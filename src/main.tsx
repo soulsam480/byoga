@@ -1,4 +1,10 @@
-import { Counter } from "./counter.v";
-import { render } from "voby";
+import { ErrorBoundary, render } from 'voby'
+import { App } from './app'
+import './style.css'
 
-render(<Counter />, document.getElementById("app"));
+render(
+  <ErrorBoundary fallback="Oh no">
+    <App />
+  </ErrorBoundary>,
+  document.getElementById('app'),
+)

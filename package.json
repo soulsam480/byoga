@@ -1,20 +1,30 @@
 {
   "name": "byoga",
-  "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
+  "dependencies": {
+    "@sinclair/typebox": "^0.32.34",
+    "comlink": "^4.4.1",
+    "papaparse": "^5.4.1",
+    "tiny-colors": "^2.2.1",
+    "voby": "^0.58.1",
+    "xlsx": "^0.18.5"
+  },
   "devDependencies": {
+    "@antfu/eslint-config": "^2.21.2",
     "@types/node": "^20.14.9",
+    "@types/papaparse": "^5.3.14",
+    "eslint": "9.5.0",
+    "eslint-plugin-format": "^0.1.2",
     "typescript": "^5.2.2",
     "vite": "^5.3.1",
+    "vite-plugin-comlink": "^5.0.1",
     "voby-vite": "^1.2.5"
-  },
-  "dependencies": {
-    "voby": "^0.58.1"
   }
 }
