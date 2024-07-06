@@ -1,17 +1,17 @@
 import { read, utils } from 'xlsx'
 import Papa from 'papaparse'
-import * as R from 'rotery'
+import * as R from 'remeda'
 import { logger } from '../utils/logger'
 import { type TTransaction, TransactionC } from './lib/normalize'
 
 const SHEET_NAME = 'Account Statement'
 
 export class ExcelWorker {
-  async process(file: File): Promise<TTransaction[] | null> {
+  async process(file: File): Promise<TTransaction[] | []> {
     const csv = await this.parseXLSX(file)
 
     if (csv === null)
-      return null
+      return []
 
     // TODO: next steps
     // 1. create db
@@ -39,7 +39,7 @@ export class ExcelWorker {
       })
     }
     catch (error) {
-      logger.error('Error parsing', error)
+      logger.warn('Error parsing file', error)
 
       return null
     }
@@ -74,7 +74,7 @@ export class ExcelWorker {
         result.push(value)
       }
       catch (error) {
-        logger.error('Error transforming', error, element)
+        logger.warn('Error normalizing', element, 'with', error)
         continue
       }
     }

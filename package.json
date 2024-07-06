@@ -11,8 +11,9 @@
   "dependencies": {
     "@sinclair/typebox": "^0.32.34",
     "comlink": "^4.4.1",
+    "frappe-charts": "^1.6.2",
     "papaparse": "^5.4.1",
-    "rotery": "^0.2.1",
+    "remeda": "^2.3.0",
     "scule": "^1.3.0",
     "tiny-colors": "^2.2.1",
     "voby": "^0.58.1",

@@ -4,6 +4,7 @@ import type { KebabCase } from 'scule'
 import { kebabCase, snakeCase } from 'scule'
 import { TypeCompiler } from '@sinclair/typebox/compiler'
 import { dateFormat } from '../../utils/date'
+import { logger } from '../../utils/logger'
 
 function deafaultNull(value: string): string | null {
   return value.length === 0 ? null : value
@@ -33,7 +34,7 @@ const TransactionT = Type.Transform(
       debit: deafaultNull(value.Debit),
       credit: deafaultNull(value.Credit),
       balance: deafaultNull(value.Balance),
-      mode,
+      mode: mode as TTransactionMode,
       ref,
     }
   })
@@ -113,20 +114,30 @@ function parseMeta(transaction: TTransactionInput): { mode: TTransactionMode, re
 
   const parts = transaction.Particulars.split('/')
 
-  if (parts.length === 0 && (ref = parseEmiRef(transaction.Particulars)) !== null) {
+  if (parts.length === 1 && (ref = parseEmiRef(transaction.Particulars)) !== null) {
     return {
       mode,
       ref,
     }
   }
 
-  mode = TransactionModeC.Decode(parts[0])
+  try {
+    mode = TransactionModeC.Decode(parts[0])
 
-  ref = extractRef(transaction, mode, parts.slice(1))
+    ref = extractRef(transaction, mode, parts.slice(1))
 
-  return {
-    mode,
-    ref,
+    return {
+      mode,
+      ref,
+    }
+  }
+  catch (error) {
+    logger.warn('[MODE]: error parsing mode for', transaction)
+
+    return {
+      mode: 'unknown',
+      ref: null,
+    }
   }
 }
 
@@ -156,7 +167,7 @@ function getMonthlyInterestRef(date: string) {
 //   // eslint-disable-next-line regexp/optimal-quantifier-concatenation
 //   = /^(?:[a-zA-Z\s-]+\/)+(?<ref>[0-9A-Z]{12,16}).*/gm
 
-const EMI_RE = /^EMI\sDEBIT\s(?<ref>\d{9})$/gm
+const EMI_RE = /^EMI\sDEBIT\s(?<ref>\d{9})$/
 
 function parseEmiRef(value: string): string | null {
   return value.match(EMI_RE)?.groups?.ref ?? null

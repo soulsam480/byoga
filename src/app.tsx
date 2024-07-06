@@ -1,12 +1,23 @@
-/* eslint-disable no-console */
-import { useResource } from 'voby'
+import { $, If, useResource } from 'voby'
+import * as R from 'remeda'
+import type { CommonData } from 'frappe-charts'
+import type { TTransactionMode } from './lib/workers/lib/normalize'
+import { Chart } from './components/Chart'
 
-const ExcelWorker = new ComlinkWorker<
+// TODO: next steps for UI ?
+// // 1. file input
+// // 2. logging processed value from worker
+// // 3. putting data on a chart
+// // 4. chart re-rendering
+
+const RemoteExcel = new ComlinkWorker<
   typeof import('./lib/workers/xlsx.worker')
 >(new URL('./lib/workers/xlsx.worker', import.meta.url))
 
 export function App(): JSX.Element {
-  const worker = useResource(async () => await new ExcelWorker.ExcelWorker())
+  const worker = useResource(async () => await new RemoteExcel.ExcelWorker())
+
+  const data = $<CommonData | null>(null)
 
   async function handleFile(event: Event) {
     const target = event.target as HTMLInputElement
@@ -16,19 +27,43 @@ export function App(): JSX.Element {
     if (file === undefined)
       return
 
-    console.time('parsing')
+    const result = (await worker().value?.process(file)) ?? []
 
-    const result = await worker().value?.process(file)
+    const grouped = R.pipe(
+      result,
+      R.reduce(
+        (acc, curr) => {
+          acc[curr.mode]
+            = acc[curr.mode] === undefined ? 1 : acc[curr.mode] + 1
 
-    console.timeEnd('parsing')
+          return acc
+        },
+        {} as Record<TTransactionMode, number>,
+      ),
+    )
 
-    console.log(result)
+    data({
+      labels: Object.keys(grouped),
+      datasets: [
+        {
+          values: Object.values(grouped),
+        },
+      ],
+    })
   }
 
   return (
     <>
       <label for="file">Choose file</label>
       <input name="file" type="file" onChange={handleFile} />
+
+      <If when={data}>
+        {(value) => {
+          return <Chart data={value} />
+        }}
+
+      </If>
+
     </>
   )
 }

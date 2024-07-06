@@ -16,6 +16,17 @@ const config = defineConfig({
   worker: {
     plugins: () => [comlink()],
   },
+  build: {
+    target: 'esnext',
+    // minify: 'esbuild',
+    minify: false,
+    cssMinify: 'lightningcss',
+  },
+  resolve: {
+    alias: {
+      'frappe-charts': 'frappe-charts/dist/frappe-charts.min.esm',
+    },
+  },
 })
 
 export default config
