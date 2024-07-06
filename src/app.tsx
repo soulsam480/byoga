@@ -1,8 +1,8 @@
 import { $, If, useResource } from 'voby'
-import * as R from 'remeda'
 import type { CommonData } from 'frappe-charts'
-import type { TTransactionMode } from './lib/workers/lib/normalize'
 import { Chart } from './components/Chart'
+// TODO: use the DB shape when we have it
+import type { TTransactionMode } from './lib/workers/lib/transformers/transaction_mode'
 
 // TODO: next steps for UI ?
 // // 1. file input
@@ -29,17 +29,14 @@ export function App(): JSX.Element {
 
     const result = (await worker().value?.process(file)) ?? []
 
-    const grouped = R.pipe(
-      result,
-      R.reduce(
-        (acc, curr) => {
-          acc[curr.mode]
-            = acc[curr.mode] === undefined ? 1 : acc[curr.mode] + 1
+    const grouped = result.reduce(
+      (acc, curr) => {
+        acc[curr.transaction_mode]
+            = acc[curr.transaction_mode] === undefined ? 1 : acc[curr.transaction_mode] + 1
 
-          return acc
-        },
-        {} as Record<TTransactionMode, number>,
-      ),
+        return acc
+      },
+      {} as Record<TTransactionMode, number>,
     )
 
     data({

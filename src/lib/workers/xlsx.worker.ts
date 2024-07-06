@@ -2,7 +2,8 @@ import { read, utils } from 'xlsx'
 import Papa from 'papaparse'
 import * as R from 'remeda'
 import { logger } from '../utils/logger'
-import { type TTransaction, TransactionC } from './lib/normalize'
+import type { TTransaction } from './lib/transformers/transaction'
+import { TransactionC } from './lib/transformers/transaction'
 
 const SHEET_NAME = 'Account Statement'
 
@@ -22,6 +23,8 @@ export class ExcelWorker {
 
     return R.pipe(csv, this.parseCSV, this.normalize)
   }
+
+  // === LOGIC ===
 
   private async parseXLSX(file: File) {
     const book = read(await file.arrayBuffer())

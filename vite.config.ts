@@ -1,6 +1,20 @@
+import type { Plugin } from 'vite'
 import { defineConfig } from 'vite'
 import voby from 'voby-vite'
 import { comlink } from 'vite-plugin-comlink'
+
+function SQLiteDevPlugin(): Plugin {
+  return {
+    name: 'configure-response-headers',
+    configureServer: (server) => {
+      server.middlewares.use((_req, res, next) => {
+        res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp')
+        res.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
+        next()
+      })
+    },
+  }
+}
 
 const config = defineConfig({
   plugins: [
@@ -12,6 +26,7 @@ const config = defineConfig({
         filter: /\.(jsx|tsx)$/, // Regex matching the files containing components to enable HMR for
       },
     }),
+    SQLiteDevPlugin(),
   ],
   worker: {
     plugins: () => [comlink()],
@@ -26,6 +41,9 @@ const config = defineConfig({
     alias: {
       'frappe-charts': 'frappe-charts/dist/frappe-charts.min.esm',
     },
+  },
+  optimizeDeps: {
+    exclude: ['sqlocal'],
   },
 })
 
