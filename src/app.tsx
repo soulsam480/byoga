@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useResource } from 'voby'
 
 const ExcelWorker = new ComlinkWorker<
@@ -7,7 +8,7 @@ const ExcelWorker = new ComlinkWorker<
 export function App(): JSX.Element {
   const worker = useResource(async () => await new ExcelWorker.ExcelWorker())
 
-  function handleFile(event: Event) {
+  async function handleFile(event: Event) {
     const target = event.target as HTMLInputElement
 
     const file = target.files?.[0]
@@ -15,7 +16,13 @@ export function App(): JSX.Element {
     if (file === undefined)
       return
 
-    worker().value?.process(file)
+    console.time('parsing')
+
+    const result = await worker().value?.process(file)
+
+    console.timeEnd('parsing')
+
+    console.log(result)
   }
 
   return (

@@ -17,6 +17,12 @@ importers:
       papaparse:
         specifier: ^5.4.1
         version: 5.4.1
+      rotery:
+        specifier: ^0.2.1
+        version: 0.2.1
+      scule:
+        specifier: ^1.3.0
+        version: 1.3.0
       tiny-colors:
         specifier: ^2.2.1
         version: 2.2.1
@@ -1478,12 +1484,19 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
+  rotery@0.2.1:
+    resolution: {integrity: sha512-DIUDDrC0PcHpy47RniUb/Rkk+grP3XSd4nPrVLcQ5Im6SHOyXTVTG0T8773CrzOlOkEJzrsIMNq57KT6i7oY7Q==}
+    engines: {node: '>=10.24.1'}
+
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
 
   scslre@0.3.0:
     resolution: {integrity: sha512-3A6sD0WYP7+QrjbfNA2FN3FsOaGGFoekCVgTyypy53gPxhbkCIjtO6YWgdrfM+n/8sI8JeXZOIxsHjMTNxQ4nQ==}
     engines: {node: ^14.0.0 || >=16.0.0}
+
+  scule@1.3.0:
+    resolution: {integrity: sha512-6FtHJEvt+pVMIB9IBY+IcCJ6Z5f1iQnytgyfKMhDKgmzYG+TeH/wx1y3l27rshSbLiSanrR9ffZDrEsmjlQF2g==}
 
   semver@5.7.2:
     resolution: {integrity: sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==}
@@ -3219,6 +3232,8 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.18.0
       fsevents: 2.3.3
 
+  rotery@0.2.1: {}
+
   run-parallel@1.2.0:
     dependencies:
       queue-microtask: 1.2.3
@@ -3228,6 +3243,8 @@ snapshots:
       '@eslint-community/regexpp': 4.11.0
       refa: 0.12.1
       regexp-ast-analysis: 0.7.1
+
+  scule@1.3.0: {}
 
   semver@5.7.2: {}
 
