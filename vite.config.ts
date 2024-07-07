@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import voby from 'voby-vite'
 import { comlink } from 'vite-plugin-comlink'
 
@@ -44,6 +44,13 @@ const config = defineConfig({
   },
   optimizeDeps: {
     exclude: ['sqlocal'],
+  },
+  test: {
+    include: ['tests/**/*.spec.ts'],
+    globals: true,
+    coverage: {
+      provider: 'v8',
+    },
   },
 })
 

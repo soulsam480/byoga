@@ -20,7 +20,13 @@ const TransactionT = Type.Transform(
   }),
 )
   .Decode((value) => {
-    const { transaction_mode, transaction_ref } = parseMeta(value)
+    const {
+      transaction_mode,
+      transaction_ref,
+      additional_meta,
+      tags,
+      transaction_category,
+    } = parseMeta(value)
 
     return {
       transaction_date: new Date(
@@ -34,6 +40,9 @@ const TransactionT = Type.Transform(
       balance: deafaultNull(value.Balance),
       transaction_mode: transaction_mode as TTransactionMode,
       transaction_ref,
+      transaction_category,
+      additional_meta,
+      tags,
     }
   })
   .Encode((value) => {

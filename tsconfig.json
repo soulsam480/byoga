@@ -9,6 +9,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
+    "types": ["vitest/globals"],
     "allowImportingTsExtensions": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,
@@ -19,5 +20,5 @@
     "isolatedModules": true,
     "skipLibCheck": true
   },
-  "include": ["src", "@types"]
+  "include": ["src", "@types", "tests"]
 }
