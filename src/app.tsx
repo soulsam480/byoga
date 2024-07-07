@@ -1,8 +1,9 @@
 import { $, If, useResource } from 'voby'
 import type { CommonData } from 'frappe-charts'
 import { Chart } from './lib/components/Chart'
-// TODO: use the DB shape when we have it
-import type { TTransactionMode } from './workers/lib/transformers/transaction_mode'
+import { db, deleteDB } from './db/client'
+import { logger } from './lib/utils/logger'
+import type { TransactionModel } from './db/table'
 
 // TODO: next steps for UI ?
 // // 1. file input
@@ -36,7 +37,7 @@ export function App(): JSX.Element {
 
         return acc
       },
-      {} as Record<TTransactionMode, number>,
+      {} as Record<TransactionModel['transaction_mode'], number>,
     )
 
     data({
@@ -49,8 +50,15 @@ export function App(): JSX.Element {
     })
   }
 
+  async function handleCount() {
+    const res = await db.selectFrom('transactions').select(['transaction_ref']).execute()
+
+    logger.info('Query results.', res)
+  }
+
   return (
     <>
+
       <label for="file">Choose file</label>
       <input name="file" type="file" onChange={handleFile} />
 
@@ -61,6 +69,13 @@ export function App(): JSX.Element {
 
       </If>
 
+      <button onClick={deleteDB}>
+        Drop
+      </button>
+
+      <button onClick={handleCount}>
+        Query. Check console
+      </button>
     </>
   )
 }

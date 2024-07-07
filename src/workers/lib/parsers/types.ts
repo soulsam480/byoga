@@ -1,3 +1,6 @@
+/**
+ * @private
+ */
 export type TTransactionCategory =
   | 'food'
   | 'bike'
@@ -14,7 +17,6 @@ export type TTransactionCategory =
   | 'personal'
   | 'cash_transfer'
   | 'emi'
-  | 'bank_mandate'
   | 'atm_cash'
   | 'salary'
   | 'bank_transfer'

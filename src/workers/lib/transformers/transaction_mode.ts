@@ -66,6 +66,12 @@ const TransactionModeT = Type.Transform(
   }
 })
 
+/**
+ * @private
+ */
 export const TransactionModeC = TypeCompiler.Compile(TransactionModeT)
 
+/**
+ * @private
+ */
 export type TTransactionMode = StaticDecode<typeof TransactionModeT>

@@ -113,7 +113,7 @@ const EMI_REF_RE = /^EMI\sDEBIT\s(?<ref>\d{9})$/
 function createMonthlyInterestRef(date: string) {
   const parsed = new Date(Date.parse(date))
 
-  return `monthly_interest_${dateFormat(parsed).ddmmyyyy()}`
+  return `monthly_interest_${dateFormat(parsed).ddmmyyyy().replace(/\//g, '_')}`
 }
 
 function parseSingleMeta(

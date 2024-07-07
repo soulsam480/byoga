@@ -2,29 +2,66 @@ import { read, utils } from 'xlsx'
 import Papa from 'papaparse'
 import * as R from 'remeda'
 import { logger } from '../lib/utils/logger'
-import type { TTransaction } from './lib/transformers/transaction'
+import { migrateUp } from '../db/lib/migrator'
+import { db } from '../db/client'
+import type { TransactionInsert } from '../db/table'
 import { TransactionC } from './lib/transformers/transaction'
+import type { TTransaction } from './lib/transformers/transaction'
 
 const SHEET_NAME = 'Account Statement'
 
 export class ExcelWorker {
-  async process(file: File): Promise<TTransaction[] | []> {
+  async process(file: File): Promise<TTransaction[]> {
     const csv = await this.parseXLSX(file)
 
     if (csv === null)
       return []
 
     // TODO: next steps
-    // 1. create db
-    // 2. put schema and migrations
-    // 3. feed data to DB
+    // // 1. create db
+    // // 2. put schema and migrations
+    // // 3. feed data to DB
     //  // 4. extract UID from meta and try using it to dedupe
-    // 5. feed via transactions ?
+    // // 5. feed via transactions ?
 
-    return R.pipe(csv, this.parseCSV, this.normalize)
+    const results = R.pipe(csv, this.parseCSV, this.normalize)
+
+    await this.import(results)
+
+    return results
   }
 
   // === LOGIC ===
+
+  private async import(transactions: TTransaction[]) {
+    await migrateUp()
+
+    logger.info(`[IMPORT]: started importing ${transactions.length} transactions.`)
+
+    await db.transaction().execute(async (trx) => {
+      for (const transaction of transactions) {
+        const { transaction_date, value_date: _, ...rest } = transaction
+
+        const payload: TransactionInsert = {
+          ...rest,
+          transaction_at: new Date(transaction_date),
+          created_at: new Date(),
+          updated_at: new Date(),
+        }
+
+        await trx
+          .insertInto('transactions')
+          .values(payload)
+          .onConflict(qb =>
+            qb.column('transaction_ref').doNothing(),
+          )
+          .returning('id')
+          .execute()
+      }
+    })
+
+    logger.info(`[IMPORT]: Done importing ${transactions.length} transactions.`)
+  }
 
   private async parseXLSX(file: File) {
     const book = read(await file.arrayBuffer())
