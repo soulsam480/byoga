@@ -1,5 +1,5 @@
 import * as R from 'remeda'
-import { type IntermediateMetaResult, parseAdditionalMeta } from '../../src/lib/workers/lib/parsers/meta'
+import { type IntermediateMetaResult, parseAdditionalMeta } from '../../src/workers/lib/parsers/meta'
 // import { upi } from './parserCases.json'
 // TODO: add more tests
 

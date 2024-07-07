@@ -1,8 +1,8 @@
 import { $, If, useResource } from 'voby'
 import type { CommonData } from 'frappe-charts'
-import { Chart } from './components/Chart'
+import { Chart } from './lib/components/Chart'
 // TODO: use the DB shape when we have it
-import type { TTransactionMode } from './lib/workers/lib/transformers/transaction_mode'
+import type { TTransactionMode } from './workers/lib/transformers/transaction_mode'
 
 // TODO: next steps for UI ?
 // // 1. file input
@@ -11,8 +11,8 @@ import type { TTransactionMode } from './lib/workers/lib/transformers/transactio
 // // 4. chart re-rendering
 
 const RemoteExcel = new ComlinkWorker<
-  typeof import('./lib/workers/xlsx.worker')
->(new URL('./lib/workers/xlsx.worker', import.meta.url))
+  typeof import('./workers/xlsx.worker')
+>(new URL('./workers/xlsx.worker', import.meta.url))
 
 export function App(): JSX.Element {
   const worker = useResource(async () => await new RemoteExcel.ExcelWorker())
