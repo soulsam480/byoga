@@ -2,6 +2,7 @@ import type { Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
 import voby from 'voby-vite'
 import { comlink } from 'vite-plugin-comlink'
+import UnoCSS from 'unocss/vite'
 
 function SQLiteDevPlugin(): Plugin {
   return {
@@ -27,6 +28,7 @@ const config = defineConfig({
       },
     }),
     SQLiteDevPlugin(),
+    UnoCSS(),
   ],
   worker: {
     plugins: () => [comlink()],

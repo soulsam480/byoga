@@ -2,9 +2,11 @@ import { ErrorBoundary, render } from 'voby'
 import { App } from './app'
 import './style.css'
 import { logger } from './lib/utils/logger'
-import { migrateUp } from './db/lib/migrator'
+import { startDatabase } from './db/lib/migrator'
+import 'virtual:uno.css'
+import '@unocss/reset/tailwind.css'
 
-void migrateUp()
+void startDatabase()
 
 render(
   <ErrorBoundary fallback={({ error }) => {

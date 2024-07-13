@@ -15,7 +15,7 @@ export const migrator = new Migrator({
 
 let dbPromise: Promise<MigrationResultSet> | null = null
 
-export async function migrateUp() {
+export async function startDatabase() {
   if (dbPromise === null) {
     dbPromise = migrator.migrateToLatest()
   }

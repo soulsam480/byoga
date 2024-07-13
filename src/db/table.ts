@@ -5,10 +5,10 @@ export interface TransactionsTable {
   meta: string
   transaction_at: Date
   transaction_ref: string | null
-  cheque_no: string | null
-  debit: string | null
-  credit: string | null
-  balance: string | null
+  cheque_no: number | null
+  debit: number | null
+  credit: number | null
+  balance: number | null
   transaction_mode:
     | 'monthly_interest'
     | 'upi'

@@ -2,7 +2,7 @@ import { read, utils } from 'xlsx'
 import Papa from 'papaparse'
 import * as R from 'remeda'
 import { logger } from '../lib/utils/logger'
-import { migrateUp } from '../db/lib/migrator'
+import { startDatabase } from '../db/lib/migrator'
 import { db } from '../db/client'
 import type { TransactionInsert } from '../db/table'
 import { TransactionC } from './lib/transformers/transaction'
@@ -34,7 +34,7 @@ export class ExcelWorker {
   // === LOGIC ===
 
   private async import(transactions: TTransaction[]) {
-    await migrateUp()
+    await startDatabase()
 
     logger.info(`[IMPORT]: started importing ${transactions.length} transactions.`)
 

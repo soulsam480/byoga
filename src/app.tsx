@@ -11,9 +11,9 @@ import type { TransactionModel } from './db/table'
 // // 3. putting data on a chart
 // // 4. chart re-rendering
 
-const RemoteExcel = new ComlinkWorker<
-  typeof import('./workers/xlsx.worker')
->(new URL('./workers/xlsx.worker', import.meta.url))
+const RemoteExcel = new ComlinkWorker<typeof import('./workers/xlsx.worker')>(
+  new URL('./workers/xlsx.worker', import.meta.url),
+)
 
 export function App(): JSX.Element {
   const worker = useResource(async () => await new RemoteExcel.ExcelWorker())
@@ -33,7 +33,9 @@ export function App(): JSX.Element {
     const grouped = result.reduce(
       (acc, curr) => {
         acc[curr.transaction_mode]
-            = acc[curr.transaction_mode] === undefined ? 1 : acc[curr.transaction_mode] + 1
+          = acc[curr.transaction_mode] === undefined
+            ? 1
+            : acc[curr.transaction_mode] + 1
 
         return acc
       },
@@ -51,14 +53,39 @@ export function App(): JSX.Element {
   }
 
   async function handleCount() {
-    const res = await db.selectFrom('transactions').select(['transaction_ref']).execute()
+    const res = await db
+      .selectFrom('transactions')
+      .where('credit', 'is', null)
+      .select(['id', 'transaction_category'])
+      // .limit(50)
+      .execute()
 
-    logger.info('Query results.', res)
+    const grouped = res.reduce(
+      (acc, curr) => {
+        acc[curr.transaction_category]
+          = acc[curr.transaction_category] === undefined
+            ? 1
+            : acc[curr.transaction_category] + 1
+
+        return acc
+      },
+      {} as Record<TransactionModel['transaction_category'], number>,
+    )
+
+    data({
+      labels: Object.keys(grouped),
+      datasets: [
+        {
+          values: Object.values(grouped),
+        },
+      ],
+    })
+
+    logger.info('Query results.', res, grouped)
   }
 
   return (
     <>
-
       <label for="file">Choose file</label>
       <input name="file" type="file" onChange={handleFile} />
 
@@ -66,16 +93,11 @@ export function App(): JSX.Element {
         {(value) => {
           return <Chart data={value} />
         }}
-
       </If>
 
-      <button onClick={deleteDB}>
-        Drop
-      </button>
+      <button onClick={deleteDB}>Drop</button>
 
-      <button onClick={handleCount}>
-        Query. Check console
-      </button>
+      <button onClick={handleCount}>Query. Check console</button>
     </>
   )
 }

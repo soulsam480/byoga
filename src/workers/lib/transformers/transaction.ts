@@ -5,7 +5,13 @@ import { parseMeta } from '../parsers/meta'
 import type { TTransactionMode } from './transaction_mode'
 
 function deafaultNull(value: string): string | null {
-  return value.length === 0 ? null : value
+  return value.length === 0 ? null : value.replaceAll(',', '')
+}
+
+function optionalInteger(value: string | number | null): number | null {
+  if (value === null || typeof value === 'number')
+    return value
+  return Number(value)
 }
 
 const TransactionT = Type.Transform(
@@ -34,10 +40,10 @@ const TransactionT = Type.Transform(
       ).toISOString(),
       value_date: new Date(Date.parse(value['Value Date'])).toISOString(),
       meta: value.Particulars,
-      cheque_no: deafaultNull(value['Cheque No.']),
-      debit: deafaultNull(value.Debit),
-      credit: deafaultNull(value.Credit),
-      balance: deafaultNull(value.Balance),
+      cheque_no: optionalInteger(deafaultNull(value['Cheque No.'])),
+      debit: optionalInteger(deafaultNull(value.Debit)),
+      credit: optionalInteger(deafaultNull(value.Credit)),
+      balance: optionalInteger(deafaultNull(value.Balance)),
       transaction_mode: transaction_mode as TTransactionMode,
       transaction_ref,
       transaction_category,
@@ -50,10 +56,10 @@ const TransactionT = Type.Transform(
       'Transaction Date': value.transaction_date,
       'Value Date': value.value_date,
       'Particulars': value.meta,
-      'Cheque No.': value.cheque_no ?? '',
-      'Debit': value.debit ?? '',
-      'Credit': value.credit ?? '',
-      'Balance': value.balance ?? '',
+      'Cheque No.': String(value.cheque_no) ?? '',
+      'Debit': String(value.debit) ?? '',
+      'Credit': String(value.credit) ?? '',
+      'Balance': String(value.balance) ?? '',
     }
   })
 

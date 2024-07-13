@@ -11,13 +11,13 @@ export const Migration1720360595599AddTransaction: Migration = {
 
       .addColumn('meta', 'text', col => col.notNull())
 
-      .addColumn('cheque_no', 'text')
+      .addColumn('cheque_no', 'integer')
 
-      .addColumn('debit', 'text')
+      .addColumn('debit', 'integer')
 
-      .addColumn('credit', 'text')
+      .addColumn('credit', 'integer')
 
-      .addColumn('balance', 'text')
+      .addColumn('balance', 'integer')
 
       .addColumn('transaction_mode', 'text', col => col.notNull())
 
