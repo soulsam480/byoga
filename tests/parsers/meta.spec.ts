@@ -1,5 +1,8 @@
 import * as R from 'remeda'
-import { type IntermediateMetaResult, parseAdditionalMeta } from '../../src/workers/lib/parsers/meta'
+import {
+  type IntermediateMetaResult,
+  parseAdditionalMeta,
+} from '../../src/workers/lib/parsers/meta'
 // import { upi } from './parserCases.json'
 // TODO: add more tests
 
@@ -48,7 +51,22 @@ function createATMData(): IntermediateMetaResult {
 describe('parsers/parseAdditionalMeta', () => {
   describe('given upi transactions', () => {
     describe('for food cases', () => {
-      const cases = ['food', 'lunch', 'chicken', 'milk', 'curd', 'fruit', 'juice', 'coffe', 'lunch', 'dinner', 'egg', 'coke', 'coconut', 'mutton']
+      const cases = [
+        'food',
+        'lunch',
+        'chicken',
+        'milk',
+        'curd',
+        'fruit',
+        'juice',
+        'coffe',
+        'lunch',
+        'dinner',
+        'egg',
+        'coke',
+        'coconut',
+        'mutton',
+      ]
 
       it('extracts categories', () => {
         R.pipe(
@@ -63,7 +81,15 @@ describe('parsers/parseAdditionalMeta', () => {
     })
 
     describe('for deposit cases', () => {
-      const cases = ['RD', 'SBI RD', 'SBI rd', 'deposit', 'mother deposit', 'mother sbi deposit', 'monthly deposit']
+      const cases = [
+        'RD',
+        'SBI RD',
+        'SBI rd',
+        'deposit',
+        'mother deposit',
+        'mother sbi deposit',
+        'monthly deposit',
+      ]
 
       it('extracts categories', () => {
         R.pipe(
@@ -73,6 +99,20 @@ describe('parsers/parseAdditionalMeta', () => {
             expect(Array.from(ctx.categories)).toEqual(['deposit'])
             expect(Array.from(ctx.tags).length).greaterThanOrEqual(1)
           }),
+        )
+      })
+    })
+
+    describe('for formatted upi transactions', () => {
+      it('extracts data from meta', () => {
+        R.pipe(
+          createUPIData('I test p Soumya l phoniex mall r lord of drinks'),
+          parseAdditionalMeta,
+          (ctx) => {
+            expect(Array.from(ctx.categories)).toEqual(['test'])
+            expect(Array.from(ctx.tags)).toEqual(['party', 'location', 'description'])
+            expect(ctx.additional).toEqual({ party: 'Soumya', location: 'phoniex mall', description: 'lord of drinks' })
+          },
         )
       })
     })

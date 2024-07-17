@@ -91,6 +91,17 @@ function isTransactionMode(mode: TTransactionMode) {
   }
 }
 
+const FORMATTED_TRANSACTION_RE = /^I\s.*/i
+
+function isFormattedUPITransaction() {
+  return (ctx: IntermediateMetaResult) => {
+    return (
+      ctx.transaction_mode === 'upi'
+      && FORMATTED_TRANSACTION_RE.test(ctx.parts.at(-1) ?? '')
+    )
+  }
+}
+
 // === PARSERS ===
 // parsers check and transform data inside a condition
 
@@ -152,7 +163,7 @@ function parseTransactionMode(
     }
   }
   catch (error) {
-    logger.warn('Error while parsing transaction mode for', result)
+    logger.warn('Error while parsing transaction mode for', result, error)
 
     return {
       ...result,
@@ -218,14 +229,14 @@ function execRegexp(regexp: RegExp, category: TTransactionCategory) {
       case 'monthly_interest':
         break
 
-        // neft and nach need the entire string
+      // neft and nach need the entire string
       case 'neft':
       case 'nach':
         match = ctx.transaction.Particulars.match(regexp)?.groups?.tag ?? null
 
         break
 
-        // imps needs to extract recipient
+      // imps needs to extract recipient
       case 'imps': {
         const { tag = 'transfer', recipient }
           = ctx.transaction.Particulars.match(regexp)?.groups ?? {}
@@ -317,11 +328,105 @@ const IMPS_RE: RegexpGenerator = ctx =>
   )
 
 /**
- * TODO: Next plans for parsing
- * - impl a formatted string setup
- * - i.e. when meta is entered in certain format, it'll be easier to parse
- * - something like f:category-tag-place-recipient etc.
+ * // TODO: Next plans for parsing
+ * // - impl a formatted string setup
+ * // - i.e. when meta is entered in certain format, it'll be easier to parse
+ * // - something like f:category-tag-place-recipient etc.
  */
+
+const STRING_CHUNK_RE = /.{2}/g
+const EXPRESSION_RE = /^[iplre]/i
+
+type TExpression = 'i' | 'p' | 'l' | 'r' | 'e'
+
+interface IFormattedMeta {
+  category: TTransactionCategory
+  party?: string
+  location?: string
+  description?: string
+  event?: string
+}
+
+const EXPRESSION_TO_PROPERTY_MAP: Record<TExpression, keyof IFormattedMeta> = {
+  e: 'event',
+  i: 'category',
+  l: 'location',
+  p: 'party',
+  r: 'description',
+}
+
+function parseFormattedTransaction() {
+  return (ctx: IntermediateMetaResult) => {
+    const formattedTransaction = ctx.parts.at(-1)
+
+    if (formattedTransaction === undefined)
+      return ctx
+
+    const chunks = Array.from(
+      formattedTransaction.match(STRING_CHUNK_RE) ?? [],
+    )
+
+    const indices: number[][] = []
+
+    for (let i = 0; i < chunks.length; i++) {
+      const item = chunks[i]
+
+      const last = indices[indices.length - 1]
+
+      // 1. current is an expression
+      // 2. current is only an expression
+      // 3. current ends with whitespace
+      // 4. next starts with whitespace
+      // ? last two rules are significant as they assert we only take expressions as anchors
+      const match
+        = EXPRESSION_RE.test(item.trim())
+        && item.trim().length === 1
+        && (item.endsWith(' ') || chunks[i + 1]?.startsWith(' '))
+
+      if (!match)
+        continue
+
+      const res = i * 2
+
+      if (last !== undefined) {
+        indices[indices.length - 1] = [
+          ...last,
+          item.endsWith(' ') ? res - 1 : res,
+        ]
+      }
+
+      indices.push([item.startsWith(' ') ? res + 1 : res])
+    }
+
+    const { category, ...rest }: IFormattedMeta
+      = indices.reduce<IFormattedMeta>(
+        (acc, curr) => {
+          const chunk = formattedTransaction.slice(curr[0], curr[1])
+
+          const [expr, ...value] = chunk.split(' ')
+
+          return {
+            ...acc,
+            [EXPRESSION_TO_PROPERTY_MAP[expr.toLowerCase() as TExpression]]:
+              value.join(' '),
+          }
+        },
+        {
+          category: 'unknown',
+        },
+      )
+
+    ctx.categories.add(category)
+    Object.keys(rest).forEach(it => ctx.tags.add(it))
+
+    ctx.additional = {
+      ...ctx.additional,
+      ...rest,
+    }
+
+    return ctx
+  }
+}
 
 /**
  * @private
@@ -342,6 +447,7 @@ export function parseAdditionalMeta(ctx: IntermediateMetaResult) {
           ),
       ],
       [isTransactionMode('imps'), execRegexp(IMPS_RE(ctx), 'bank_transfer')],
+      [isFormattedUPITransaction(), parseFormattedTransaction()],
       R.conditional.defaultCase(value =>
         R.pipe(
           value,

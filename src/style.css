@@ -1,0 +1,16 @@
+:root {
+  --rounded-box: 0.5rem;
+  --rounded-btn: 4px !important;
+  --rounded-badge: 0.9rem;
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+  --btn-focus-scale: 0.95;
+  --border-btn: 1px;
+  --tab-border: 1px;
+  --tab-radius: 4px !important;
+  --btn-text-case: normal !important;
+}
+
+.alert {
+  padding: 8px !important;
+}
