@@ -1,5 +1,7 @@
 import { Navbar } from './lib/components/Navbar'
 import { Alerts } from './lib/components/Alerts'
+import { CategoryTransactionVolume } from './lib/components/Categories'
+import { TransactionModeVolume } from './lib/components/Modes'
 
 // TODO: next steps for UI ?
 // // 1. file input
@@ -12,6 +14,16 @@ export function App(): JSX.Element {
     <>
       <Alerts />
       <Navbar />
+
+      <div class="grid grid-cols-1 lg:grid-cols-2">
+        <CategoryTransactionVolume type="debit" />
+        <CategoryTransactionVolume type="credit" />
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2">
+        <TransactionModeVolume type="debit" />
+        <TransactionModeVolume type="credit" />
+      </div>
     </>
   )
 }

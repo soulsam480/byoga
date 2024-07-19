@@ -31,7 +31,7 @@ const ALERT_TO_CLASS_MAP: Record<IAlert['type'], string> = {
 export function Alerts(): JSX.Element {
   return (
     <Portal mount={document.body}>
-      <div class="fixed top-0 z-50 inset-x-0 flex flex-col gap-2 items-center justify-center pt-8">
+      <div class="fixed top-8 z-50 inset-x-0 flex flex-col gap-2 items-center justify-center">
         <For values={alerts}>
           {(value) => {
             return (

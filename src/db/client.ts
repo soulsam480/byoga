@@ -1,6 +1,6 @@
 import { Kysely } from 'kysely'
 import { SQLocalKysely } from 'sqlocal/kysely'
-import type { Database } from './table'
+import type { Database } from './schema'
 import { kyselyLogger } from './lib/logger'
 import { TypeBoxModelsPlugin } from './lib/plugins/models'
 

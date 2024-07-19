@@ -49,8 +49,8 @@ export function Navbar(): JSX.Element {
   }
 
   return (
-    <div class="navbar bg-base-100 shadow-sm shadow-base-content">
-      <h4 class="text-xl flex-1">Byoga</h4>
+    <div class="navbar bg-base-100 shadow-sm shadow-base-content min-h-12">
+      <h4 class="text-base flex-1">Byoga</h4>
 
       <div class="flex-none flex gap-0.5 items-center">
         <button class="btn btn-ghost btn-sm" onClick={importFile}>

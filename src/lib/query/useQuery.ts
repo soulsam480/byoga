@@ -1,4 +1,6 @@
-import { $, useMemo } from 'voby'
+import { $, $$, useEffect, useMemo } from 'voby'
+
+// TODO: refactor to have stuff like react query
 
 const fetcherStore = $<Record<string, () => Promise<unknown>>>({})
 const store = $<Record<string, any>>({})
@@ -19,6 +21,10 @@ export function useQuery<T>(key: string[], fetcher: () => Promise<T>) {
 
   fetcherStore(prev => ({ ...prev, [serialized()]: invalidate }))
 
+  useEffect(() => {
+    void invalidate()
+  })
+
   const value = useMemo<T | undefined>(() => store()[serialized()])
 
   return {
@@ -27,6 +33,14 @@ export function useQuery<T>(key: string[], fetcher: () => Promise<T>) {
   }
 }
 
-export async function invalidateQuery(key: string[]) {
+export async function invalidateQuery(key: '*' | string[]) {
+  if (typeof key === 'string') {
+    for (const fetcher in $$(fetcherStore)) {
+      await $$(fetcherStore)[fetcher]()
+    }
+
+    return
+  }
+
   await fetcherStore()[JSON.stringify(key)]?.()
 }
