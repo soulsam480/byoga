@@ -1,23 +1,26 @@
-import { $, For, Portal } from 'voby'
+import { signal } from '@preact/signals'
+import clsx from 'clsx'
+import type { JSX } from 'preact/compat'
+import { createPortal } from 'preact/compat'
 
 interface IAlert {
   type: 'success' | 'warning' | 'info' | 'error'
   message: string
 }
 
-const alerts = $<IAlert[]>([])
+const alerts = signal<IAlert[]>([])
 
 export function showAlert(alert: IAlert) {
-  alerts(prev => [...prev, alert])
+  alerts.value.push(alert)
 
   window.setTimeout(() => {
-    alerts((prev) => {
-      const result = prev.slice()
+    const result = alerts.value.slice()
 
-      result.shift()
+    result.shift()
 
-      return result
-    })
+    alerts.value = result
+
+    return result
   }, 1500)
 }
 
@@ -30,18 +33,17 @@ const ALERT_TO_CLASS_MAP: Record<IAlert['type'], string> = {
 
 export function Alerts(): JSX.Element {
   return (
-    <Portal mount={document.body}>
+    createPortal(
       <div class="fixed top-8 z-50 inset-x-0 flex flex-col gap-2 items-center justify-center">
-        <For values={alerts}>
-          {(value) => {
-            return (
-              <div role="alert" class={['alert max-w-96', ALERT_TO_CLASS_MAP[value.type]]}>
-                {value.message}
-              </div>
-            )
-          }}
-        </For>
-      </div>
-    </Portal>
+        {alerts.value.map((value) => {
+          return (
+            <div role="alert" className={clsx(['alert max-w-96', ALERT_TO_CLASS_MAP[value.type]])}>
+              {value.message}
+            </div>
+          )
+        })}
+      </div>,
+      document.body,
+    )
   )
 }

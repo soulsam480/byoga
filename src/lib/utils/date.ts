@@ -31,5 +31,11 @@ export function dateFormat(date: Date) {
     dd() {
       return date.toLocaleDateString('en-US', { day: 'numeric' })
     },
+    mmm() {
+      return date.toLocaleString('en-US', { month: 'short' })
+    },
+    mmmm() {
+      return date.toLocaleString('en-US', { month: 'long' })
+    },
   }
 }

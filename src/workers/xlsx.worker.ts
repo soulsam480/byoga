@@ -4,7 +4,7 @@ import * as R from 'remeda'
 import { logger } from '../lib/utils/logger'
 import { startDatabase } from '../db/lib/migrator'
 import { db } from '../db/client'
-import type { TransactionInsert } from '../db/table'
+import type { TransactionInsert } from '../db/schema'
 import { TransactionC } from './lib/transformers/transaction'
 import type { TTransaction } from './lib/transformers/transaction'
 

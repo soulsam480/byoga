@@ -1,34 +1,40 @@
 import type { ChartOptions, CommonData } from 'frappe-charts'
 import { Chart as FChart } from 'frappe-charts'
-import type { ObservableLike } from 'voby'
-import { $, useEffect } from 'voby'
 import './chart.css'
+import type { Signal } from '@preact/signals'
+import { useSignalEffect } from '@preact/signals'
+import { useRef } from 'preact/hooks'
+import clsx from 'clsx'
+
+export const THEME_COLORS = ['#66cc8a', '#377cfb', '#f68067']
 
 interface ChartProps extends Omit<ChartOptions, 'data'> {
-  data: ObservableLike<CommonData>
+  data: Signal<CommonData>
+  className?: string
 }
 
-export function Chart({ data, ...options }: ChartProps) {
-  const chartContainer = $<HTMLDivElement | null>(null)
+export function Chart({ data, className, ...options }: ChartProps) {
+  const chartContainer = useRef<HTMLDivElement | null>(null)
+  const chart = useRef<FChart | null>(null)
 
-  const chart = $<FChart | null>(null)
-
-  useEffect(() => {
-    const _chart = chart()
-    const _chartContainer = chartContainer()
+  useSignalEffect(() => {
+    const _chart = chart.current
+    const _chartContainer = chartContainer.current
 
     if (_chart === null && _chartContainer !== null) {
       const instance = new FChart(_chartContainer, {
+        colors: THEME_COLORS,
+        truncateLegends: false,
         ...options,
-        data: data(),
+        data: data.value,
       })
 
-      chart(instance)
+      chart.current = (instance)
     }
     else if (_chart !== null) {
-      _chart?.update(data())
+      _chart?.update(data.value)
     }
   })
 
-  return <div class="chart__parent" ref={chartContainer} />
+  return <div class={clsx('chart__parent', className)} ref={chartContainer} />
 }

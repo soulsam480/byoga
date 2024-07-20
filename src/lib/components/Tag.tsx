@@ -1,6 +1,5 @@
-export function Tag(tag: string): JSX.Element {
+export function Tag(tag: string) {
   return (
     <div class="badge badge-secondary">{tag}</div>
-
   )
 }

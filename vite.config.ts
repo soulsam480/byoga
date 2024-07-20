@@ -1,8 +1,8 @@
 import type { Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
-import voby from 'voby-vite'
+import preact from '@preact/preset-vite'
 import { comlink } from 'vite-plugin-comlink'
-import UnoCSS from 'unocss/vite'
+import Unfonts from 'unplugin-fonts/vite'
 
 function SQLiteDevPlugin(): Plugin {
   return {
@@ -20,15 +20,25 @@ function SQLiteDevPlugin(): Plugin {
 const config = defineConfig({
   plugins: [
     comlink(),
-    voby({
-      hmr: {
-        // HMR-related options
-        enabled: process.env.NODE_ENV !== 'production', // Whether HMR is enabled or not
-        filter: /\.(jsx|tsx)$/, // Regex matching the files containing components to enable HMR for
+    preact(),
+    SQLiteDevPlugin(),
+    Unfonts({
+      google: {
+        families: [
+          {
+            /**
+             * Family name (required)
+             */
+            name: 'Inter',
+
+            /**
+             * Family styles
+             */
+            // styles: 'ital,wght@0,400;1,200',
+          },
+        ],
       },
     }),
-    SQLiteDevPlugin(),
-    UnoCSS(),
   ],
   worker: {
     plugins: () => [comlink()],

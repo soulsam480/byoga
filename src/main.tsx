@@ -1,11 +1,9 @@
-import { ErrorBoundary, render } from 'voby'
+import { render } from 'preact'
 import { App } from './app'
 import './style.css'
-import { logger } from './lib/utils/logger'
 import { startDatabase } from './db/lib/migrator'
-import 'virtual:uno.css'
-import '@unocss/reset/tailwind.css'
 import { showAlert } from './lib/components/Alerts'
+import 'unfonts.css'
 
 void startDatabase().then(() => {
   showAlert({
@@ -15,13 +13,14 @@ void startDatabase().then(() => {
 })
 
 render(
-  <ErrorBoundary fallback={({ error }) => {
-    logger.warn('[UI]: ', error)
+  // <ErrorBoundary fallback={({ error }) => {
+  //   logger.warn('[UI]: ', error)
 
-    return 'ERROR'
-  }}
-  >
-    <App />
-  </ErrorBoundary>,
-  document.getElementById('app'),
+  //   return 'ERROR'
+  // }}
+  // >
+  <App />
+  // </ErrorBoundary>
+  ,
+  document.getElementById('app')!,
 )

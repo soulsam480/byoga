@@ -1,7 +1,7 @@
 import type { CommonData } from 'frappe-charts'
 import { titleCase } from 'scule'
-import { useMemo } from 'voby'
 import * as R from 'remeda'
+import { useComputed } from '@preact/signals'
 import { db } from '../../db/client'
 import { startDatabase } from '../../db/lib/migrator'
 import type { TransactionModel } from '../../db/schema'
@@ -13,7 +13,7 @@ interface ITransactionModeProps {
   type: 'credit' | 'debit'
 }
 
-export function TransactionModeVolume({ type }: ITransactionModeProps): JSX.Element {
+export function TransactionModeVolume({ type }: ITransactionModeProps) {
   const { value: categories } = useQuery([`${type}_mode_volume`], async () => {
     await startDatabase()
 
@@ -46,14 +46,14 @@ export function TransactionModeVolume({ type }: ITransactionModeProps): JSX.Elem
     )
   })
 
-  const dataSet = useMemo<CommonData>(() => {
+  const dataSet = useComputed<CommonData>(() => {
     return {
-      labels: categories()?.map(it => it[0]) ?? [],
+      labels: categories.value?.map(it => it[0]) ?? [],
       datasets: [
         {
           name: 'Total amount in rupees.',
           chartType: 'bar',
-          values: categories()?.map(it => it[1]) ?? [],
+          values: categories.value?.map(it => it[1]) ?? [],
         },
       ],
     }

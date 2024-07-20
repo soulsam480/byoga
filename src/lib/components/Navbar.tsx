@@ -1,15 +1,19 @@
-import { useResource } from 'voby'
+import { useRef } from 'preact/hooks'
+import type { Remote } from 'comlink'
 import { deleteDB } from '../../db/client'
+import type { ExcelWorker } from '../../workers/xlsx.worker'
 import { showAlert } from './Alerts'
 
 const RemoteExcel = new ComlinkWorker<
   typeof import('../../workers/xlsx.worker')
 >(new URL('../../workers/xlsx.worker', import.meta.url))
 
-export function Navbar(): JSX.Element {
-  const worker = useResource(async () => await new RemoteExcel.ExcelWorker())
+export function Navbar() {
+  const worker = useRef<Remote<ExcelWorker> | null>(null)
 
-  function importFile() {
+  async function importFile() {
+    worker.current = await new RemoteExcel.ExcelWorker()
+
     const inputEl = document.createElement('input')
 
     inputEl.type = 'file'
@@ -27,7 +31,7 @@ export function Navbar(): JSX.Element {
 
       document.body.removeChild(inputEl)
 
-      const res = await worker().value?.process(file)
+      const res = await worker.current?.process(file)
 
       if (res !== undefined) {
         showAlert({
@@ -49,11 +53,11 @@ export function Navbar(): JSX.Element {
   }
 
   return (
-    <div class="navbar bg-base-100 shadow-sm shadow-base-content min-h-12">
+    <div class="navbar bg-base-100 shadow min-h-12">
       <h4 class="text-base flex-1">Byoga</h4>
 
       <div class="flex-none flex gap-0.5 items-center">
-        <button class="btn btn-ghost btn-sm" onClick={importFile}>
+        <button class="btn btn-primary btn-sm" onClick={importFile}>
           Import
         </button>
 

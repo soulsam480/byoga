@@ -1,10 +1,10 @@
-import type { TransactionModel } from '../table'
+import type { TransactionModel } from '../schema'
 
 function safeParseJSON<T>(json: string, defaultValue: T) {
   try {
     return JSON.parse(json) as T
   }
-  catch (error) {
+  catch (_) {
     return defaultValue
   }
 }
