@@ -6,7 +6,7 @@ import { showAlert } from './Alerts'
 
 const RemoteExcel = new ComlinkWorker<
   typeof import('../../workers/xlsx.worker')
->(new URL('../../workers/xlsx.worker', import.meta.url))
+>(new URL('../../workers/xlsx.worker', import.meta.url), { type: 'module' })
 
 export function Navbar() {
   const worker = useRef<Remote<ExcelWorker> | null>(null)

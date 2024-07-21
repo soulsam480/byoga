@@ -3,6 +3,7 @@ import { defineConfig } from 'vitest/config'
 import preact from '@preact/preset-vite'
 import { comlink } from 'vite-plugin-comlink'
 import Unfonts from 'unplugin-fonts/vite'
+import inspect from 'vite-plugin-inspect'
 
 function SQLiteDevPlugin(): Plugin {
   return {
@@ -19,6 +20,10 @@ function SQLiteDevPlugin(): Plugin {
 
 const config = defineConfig({
   plugins: [
+    inspect({
+      build: true,
+      outputDir: '.vite-inspect',
+    }),
     comlink(),
     preact(),
     SQLiteDevPlugin(),
@@ -41,6 +46,7 @@ const config = defineConfig({
     }),
   ],
   worker: {
+    format: 'es',
     plugins: () => [comlink()],
   },
   build: {
