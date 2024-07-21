@@ -4,6 +4,7 @@ import preact from '@preact/preset-vite'
 import { comlink } from 'vite-plugin-comlink'
 import Unfonts from 'unplugin-fonts/vite'
 import inspect from 'vite-plugin-inspect'
+import { VitePWA } from 'vite-plugin-pwa'
 
 function SQLiteDevPlugin(): Plugin {
   return {
@@ -41,6 +42,50 @@ const config = defineConfig({
         ],
       },
     }),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,json,svg,png,ico,wasm}'],
+      },
+      manifest: {
+        name: 'Byoga',
+        short_name: 'Byoga',
+        description: 'IDFC Bank statement analyzer and visualizer',
+        theme_color: '#14A670',
+        background_color: '#14A670',
+        icons: [
+          // {
+          //   src: 'pwa-64x64.png',
+          //   sizes: '64x64',
+          //   type: 'image/png',
+          // },
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: 'pwa-maskable-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+          {
+            src: 'pwa-maskable-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
+      },
+    }),
   ],
   worker: {
     format: 'es',
@@ -48,8 +93,7 @@ const config = defineConfig({
   },
   build: {
     target: 'esnext',
-    // minify: 'esbuild',
-    minify: false,
+    minify: 'esbuild',
     cssMinify: 'lightningcss',
   },
   resolve: {

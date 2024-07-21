@@ -1,3 +1,4 @@
+import { registerSW } from 'virtual:pwa-register'
 import { render } from 'preact'
 import { App } from './app'
 import './style.css'
@@ -24,3 +25,5 @@ render(
   ,
   document.getElementById('app')!,
 )
+
+registerSW({ immediate: true })
