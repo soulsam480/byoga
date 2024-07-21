@@ -20,10 +20,7 @@ function SQLiteDevPlugin(): Plugin {
 
 const config = defineConfig({
   plugins: [
-    inspect({
-      build: true,
-      outputDir: '.vite-inspect',
-    }),
+    inspect(),
     comlink(),
     preact(),
     SQLiteDevPlugin(),
