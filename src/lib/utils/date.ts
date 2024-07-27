@@ -37,5 +37,8 @@ export function dateFormat(date: Date) {
     mmmm() {
       return date.toLocaleString('en-US', { month: 'long' })
     },
+    mmmyy() {
+      return date.toLocaleString('en-US', { month: 'short', year: '2-digit' })
+    },
   }
 }

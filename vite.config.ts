@@ -97,9 +97,9 @@ const config = defineConfig({
     cssMinify: 'lightningcss',
   },
   resolve: {
-    alias: {
-      'frappe-charts': 'frappe-charts/dist/frappe-charts.min.esm',
-    },
+    alias: [
+      { find: 'frappe-charts', replacement: 'frappe-charts/dist/frappe-charts.min.esm' },
+    ],
   },
   optimizeDeps: {
     exclude: ['sqlocal'],

@@ -1,0 +1,144 @@
+diff --git a/package.json b/package.json
+index a1dc28c1e647b6d6e9ed250eb71a9b602eecdaee..90de1277e4f27599be5bf0b13b4c64c4e44b9151 100644
+--- a/package.json
++++ b/package.json
+@@ -1,65 +1,76 @@
+ {
+-	"name": "@shelacek/plotery",
+-	"version": "1.1.1",
+-	"description": "Fast and lightweight plotting library for Preact without fuss.",
+-	"main": "dist/plotery.js",
+-	"module": "dist/plotery.es.js",
+-	"typings": "dist/plotery.d.ts",
+-	"style": "dist/css/plotery.css",
+-	"scss": "dist/scss/plotery.scss",
+-	"exports": {
+-		"require": "./dist/plotery.js",
+-		"import": "./dist/plotery.es.js",
+-		"default": "./dist/plotery.es.js"
+-	},
+-	"scripts": {
+-		"prebuild": "rm -rf dist",
+-		"build:js": "rollup -c && cp src/types.d.ts dist/plotery.d.ts",
+-		"build:scss": "sass styles/plotery.scss dist/css/plotery.css && cp -r styles dist/scss",
+-		"build": "yarn run build:js && yarn run build:scss",
+-		"prepare": "yarn run build",
+-		"lint:js": "eslint --ext .js --ext .jsx src",
+-		"lint:scss": "sass-lint styles/*.scss --verbose",
+-		"lint": "yarn run lint:js && yarn run lint:scss"
+-	},
+-	"repository": {
+-		"type": "git",
+-		"url": "https://shelacek@bitbucket.org/shelacek/plotery.git"
+-	},
+-	"keywords": [
+-		"plot",
+-		"chart",
+-		"charts",
+-		"graph",
+-		"preact"
+-	],
+-	"author": "Ales Kurecka",
+-	"license": "MIT",
+-	"bugs": {
+-		"url": "https://bitbucket.org/shelacek/plotery/issues"
+-	},
+-	"homepage": "https://shelacek.bitbucket.io/plotery",
+-	"devDependencies": {
+-		"@babel/core": "^7.17.5",
+-		"@babel/eslint-parser": "^7.17.0",
+-		"@babel/plugin-transform-react-jsx": "^7.17.3",
+-		"@babel/preset-env": "^7.16.11",
+-		"eslint": "^8.10.0",
+-		"eslint-plugin-react": "^7.29.3",
+-		"preact": "^10.6.6",
+-		"rollup": "^2.69.1",
+-		"rollup-plugin-babel": "^4.0.0-beta.7",
+-		"rollup-plugin-node-resolve": "^5.2.0",
+-		"rollup-plugin-terser": "^7.0.2",
+-		"sass": "^1.49.9",
+-		"sass-lint": "^1.12.1"
+-	},
+-	"peerDependencies": {
+-		"preact": "^10.0.0"
+-	},
+-	"files": [
+-		"dist/**"
+-	],
+-	"sideEffects": false,
+-	"packageManager": "yarn@1.22.19"
++  "name": "@shelacek/plotery",
++  "version": "1.1.1",
++  "description": "Fast and lightweight plotting library for Preact without fuss.",
++  "main": "dist/plotery.js",
++  "module": "dist/plotery.es.js",
++  "typings": "dist/plotery.d.ts",
++  "style": "dist/css/plotery.css",
++  "scss": "dist/scss/plotery.scss",
++  "exports": {
++    ".": {
++      "require": "./dist/plotery.js",
++      "import": "./dist/plotery.es.js",
++      "default": "./dist/plotery.es.js",
++      "types": "./dist/plotery.d.ts"
++    },
++    "./dist/*.css": {
++      "import": "./dist/*.css",
++      "require": "./dist/*.css"
++    },
++    "./dist/*.scss": {
++      "import": "./dist/*.scss",
++      "require": "./dist/*.scss"
++    }
++  },
++  "scripts": {
++    "prebuild": "rm -rf dist",
++    "build:js": "rollup -c && cp src/types.d.ts dist/plotery.d.ts",
++    "build:scss": "sass styles/plotery.scss dist/css/plotery.css && cp -r styles dist/scss",
++    "build": "yarn run build:js && yarn run build:scss",
++    "prepare": "yarn run build",
++    "lint:js": "eslint --ext .js --ext .jsx src",
++    "lint:scss": "sass-lint styles/*.scss --verbose",
++    "lint": "yarn run lint:js && yarn run lint:scss"
++  },
++  "repository": {
++    "type": "git",
++    "url": "https://shelacek@bitbucket.org/shelacek/plotery.git"
++  },
++  "keywords": [
++    "plot",
++    "chart",
++    "charts",
++    "graph",
++    "preact"
++  ],
++  "author": "Ales Kurecka",
++  "license": "MIT",
++  "bugs": {
++    "url": "https://bitbucket.org/shelacek/plotery/issues"
++  },
++  "homepage": "https://shelacek.bitbucket.io/plotery",
++  "devDependencies": {
++    "@babel/core": "^7.17.5",
++    "@babel/eslint-parser": "^7.17.0",
++    "@babel/plugin-transform-react-jsx": "^7.17.3",
++    "@babel/preset-env": "^7.16.11",
++    "eslint": "^8.10.0",
++    "eslint-plugin-react": "^7.29.3",
++    "preact": "^10.6.6",
++    "rollup": "^2.69.1",
++    "rollup-plugin-babel": "^4.0.0-beta.7",
++    "rollup-plugin-node-resolve": "^5.2.0",
++    "rollup-plugin-terser": "^7.0.2",
++    "sass": "^1.49.9",
++    "sass-lint": "^1.12.1"
++  },
++  "peerDependencies": {
++    "preact": "^10.0.0"
++  },
++  "files": [
++    "dist/**"
++  ],
++  "sideEffects": false,
++  "packageManager": "yarn@1.22.19"
+ }

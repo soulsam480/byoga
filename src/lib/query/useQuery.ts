@@ -3,6 +3,7 @@
 import { signal, useComputed, useSignalEffect } from '@preact/signals'
 
 let fetcherStore: Record<string, () => Promise<unknown>> = {}
+
 const store = signal<Record<string, any>>({})
 
 export function useQueryData<T>(key: string[]) {
@@ -41,7 +42,7 @@ export function useQuery<T>(key: string[], fetcher: () => Promise<T>) {
 
 export async function invalidateQuery(key: '*' | string[]) {
   if (typeof key === 'string') {
-    for (const fetcher in fetcherStore.peek()) {
+    for (const fetcher in fetcherStore) {
       await (fetcherStore)[fetcher]()
     }
 

@@ -1,11 +1,11 @@
 import { sql } from 'kysely'
 import { useComputed } from '@preact/signals'
+import type { ChartData, ChartSeriesData } from '@shelacek/plotery'
+import { BarLine, CardinalLine, Chart, LinearAxis } from '@shelacek/plotery'
 import * as R from 'remeda'
-import type { CommonData } from 'frappe-charts'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
 import { useQuery, useQueryData } from '../../query/useQuery'
-import { Chart } from '../Chart'
 import { currencyFormat } from '../../utils/currency'
 import { dateFormat } from '../../utils/date'
 
@@ -14,6 +14,19 @@ interface IMonthlyStatData {
   total_debit: number
   transaction_month: string
   monthly_balance: number | null
+}
+
+function formatMonthYear(monthStr: string | undefined | null) {
+  if (typeof monthStr !== 'string')
+    return ''
+
+  const date = new Date()
+  const [month, year] = monthStr.split('-').map(Number)
+
+  date.setMonth(month)
+  date.setFullYear(year)
+
+  return dateFormat(date).mmmyy()
 }
 
 export function AllTimeMonthlyViz() {
@@ -44,66 +57,47 @@ export function AllTimeMonthlyViz() {
     return results
   })
 
-  const graphData = useComputed<CommonData>(() => {
-    return {
-      labels: value.value?.map(it => it.transaction_month) ?? [],
-      datasets: R
-        .pipe(
-          value.value ?? [],
-          R.reduce((acc, curr) => {
-            acc[0].values?.push(curr.total_credit ?? 0)
+  const months = useComputed(() => value.value?.map(it => it.transaction_month) ?? [])
 
-            acc[1].values?.push(curr.total_debit ?? 0)
+  const pois = useComputed<ChartData>(() => {
+    return R.pipe(
+      value.value ?? [],
+      R.reduce((acc, curr, index) => {
+        const offset = 0.03
 
-            acc[2].values?.push(curr.monthly_balance ?? 0)
+        acc.credit.push([index + offset, curr.total_credit ?? 0])
+        acc.debit.push([index + offset + 0.1, (curr.total_debit ?? 0)])
+        acc.balance.push([index, (curr.monthly_balance ?? 0)])
 
-            return acc
-          }, [
-            {
-              name: 'Credit',
-              chartType: 'bar',
-              values: [],
-            },
-            {
-              name: 'Debit',
-              chartType: 'bar',
-              values: [],
-            },
-            {
-              name: 'Balance',
-              chartType: 'line',
-              values: [],
-            },
-          ] as CommonData['datasets']),
-        ),
-    }
+        return acc
+      }, {
+        credit: [],
+        debit: [],
+        balance: [],
+      } as Record<string, ChartSeriesData>),
+    )
   })
 
   return (
-    <div className="border border-base-200 rounded-lg p-4">
+    <div className="border flex flex-col gap-4 border-base-200 rounded-lg p-4" style="--plotery-margin: 0px 16px 16px 60px;">
       <div className="text-lg">
         Total Cash In and Cash Out
       </div>
-      <Chart
-        data={graphData}
-        type="axis-mixed"
-        tooltipOptions={{
-          formatTooltipX(value) {
-            const date = new Date()
 
-            date.setMonth(Number(value))
-
-            return dateFormat(date).mmmm()
-          },
-          formatTooltipY(value) {
-            return currencyFormat.format(value)
-          },
-        }}
-        height={350}
-        axisOptions={{
-          xIsSeries: true,
-        }}
-      />
+      <Chart data={pois.value}>
+        <LinearAxis
+          type="x"
+          min={0}
+          max={months.value.length}
+          labels={index => formatMonthYear(months.value[index])}
+          major
+          minor
+        />
+        <LinearAxis type="y" min={0} max={400000} major labels={value => currencyFormat.format(value)} />
+        <BarLine series="credit" />
+        <BarLine series="debit" />
+        <CardinalLine series="balance" tension={1} />
+      </Chart>
     </div>
   )
 }

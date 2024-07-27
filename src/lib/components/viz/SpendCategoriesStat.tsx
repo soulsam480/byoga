@@ -1,11 +1,9 @@
 import * as R from 'remeda'
-import type { CommonData } from 'frappe-charts'
 import { useComputed } from '@preact/signals'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
 import type { TransactionModel } from '../../../db/schema'
 import { useQuery } from '../../query/useQuery'
-import { Chart } from '../Chart'
 
 export function SpendingCatoriesViz() {
   const { value: categories } = useQuery([`spend_category_volume`], async () => {
@@ -41,7 +39,7 @@ export function SpendingCatoriesViz() {
     )
   })
 
-  const dataSet = useComputed<CommonData>(() => {
+  const _dataSet = useComputed(() => {
     return {
       labels: categories.value?.map(it => it[0]) ?? [],
       datasets: [
@@ -53,10 +51,11 @@ export function SpendingCatoriesViz() {
   })
 
   return (
-    <Chart
-      data={dataSet}
-      type="donut"
-      height={450}
-    />
+    null
+    // <Chart
+    //   data={dataSet}
+    //   type="donut"
+    //   height={450}
+    // />
   )
 }

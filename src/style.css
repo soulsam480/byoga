@@ -1,3 +1,5 @@
+@import "@shelacek/plotery/dist/css/plotery.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -17,4 +19,18 @@
 
 .alert {
   padding: 8px !important;
+}
+
+.plotery {
+  --plotery-s1-color: #66cc8a;
+  --plotery-s2-color: #377cfb;
+  --plotery-s3-color: #f68067;
+}
+
+.plotery .labels text {
+  @apply fill-base-300 text-xs transition-colors ease-in-out duration-200;
+}
+
+.plotery:hover .labels text {
+  @apply fill-primary-content;
 }

@@ -21,7 +21,7 @@ export function showAlert(alert: IAlert) {
     alerts.value = result
 
     return result
-  }, 1500)
+  }, 2000)
 }
 
 const ALERT_TO_CLASS_MAP: Record<IAlert['type'], string> = {

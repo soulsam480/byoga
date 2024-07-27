@@ -1,13 +1,9 @@
-import type { CommonData } from 'frappe-charts'
-import { titleCase } from 'scule'
 import * as R from 'remeda'
 import { useComputed } from '@preact/signals'
 import { db } from '../../db/client'
 import { startDatabase } from '../../db/lib/migrator'
 import type { TransactionModel } from '../../db/schema'
 import { useQuery } from '../query/useQuery'
-import { currencyFormat } from '../utils/currency'
-import { Chart } from './Chart'
 
 interface ITransactionModeProps {
   type: 'credit' | 'debit'
@@ -46,7 +42,7 @@ export function TransactionModeVolume({ type }: ITransactionModeProps) {
     )
   })
 
-  const dataSet = useComputed<CommonData>(() => {
+  const _dataSet = useComputed(() => {
     return {
       labels: categories.value?.map(it => it[0]) ?? [],
       datasets: [
@@ -60,20 +56,6 @@ export function TransactionModeVolume({ type }: ITransactionModeProps) {
   })
 
   return (
-    <Chart
-      title={`${titleCase(type)} transaction volume via payment method`}
-      data={dataSet}
-      type="axis-mixed"
-      tooltipOptions={{
-        formatTooltipX(value) {
-          return titleCase(String(value))
-        },
-        formatTooltipY(value) {
-          return currencyFormat.format(value)
-        },
-      }}
-      colors={['#1ab88e']}
-      height={350}
-    />
+    null
   )
 }

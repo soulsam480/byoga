@@ -1,18 +1,14 @@
-import { useRef } from 'preact/hooks'
-import type { Remote } from 'comlink'
-import { deleteDB } from '../../db/client'
-import type { ExcelWorker } from '../../workers/xlsx.worker'
+import { endpointSymbol } from 'vite-plugin-comlink/symbol'
+import { db, deleteDB } from '../../db/client'
+import { logger } from '../utils/logger'
+import { invalidateQuery } from '../query/useQuery'
 import { showAlert } from './Alerts'
 
-const RemoteExcel = new ComlinkWorker<
-  typeof import('../../workers/xlsx.worker')
->(new URL('../../workers/xlsx.worker', import.meta.url), { type: 'module' })
-
 export function Navbar() {
-  const worker = useRef<Remote<ExcelWorker> | null>(null)
-
   async function importFile() {
-    worker.current = await new RemoteExcel.ExcelWorker()
+    const worker = new ComlinkWorker<
+          typeof import('../../workers/xlsx.worker')
+    >(new URL('../../workers/xlsx.worker', import.meta.url), { type: 'module' })
 
     const inputEl = document.createElement('input')
 
@@ -31,14 +27,40 @@ export function Navbar() {
 
       document.body.removeChild(inputEl)
 
-      const res = await worker.current?.process(file)
+      const transactions = await worker.process(file)
 
-      if (res !== undefined) {
+      if (transactions !== undefined) {
+        showAlert({
+          type: 'info',
+          message: `Started importing ${transactions.length} transactions!`,
+        })
+
+        logger.info(`[IMPORT]: started importing ${transactions.length} transactions.`)
+
+        await db.transaction().execute(async (trx) => {
+          for (const transaction of transactions) {
+            await trx
+              .insertInto('transactions')
+              .values(transaction)
+              .onConflict(qb =>
+                qb.column('transaction_ref').doNothing(),
+              )
+              .returning('id')
+              .execute()
+          }
+        })
+
+        logger.info(`[IMPORT]: Done importing ${transactions.length} transactions.`)
+
         showAlert({
           type: 'success',
-          message: `Imported ${res.length} transactions!`,
+          message: `Imported ${transactions.length} transactions!`,
         })
+
+        void invalidateQuery('*')
       }
+
+      worker[endpointSymbol].terminate()
     })
 
     document.body.appendChild(inputEl)
@@ -50,6 +72,8 @@ export function Navbar() {
     await deleteDB()
 
     showAlert({ type: 'success', message: 'DB Reset successfully.' })
+
+    void invalidateQuery('*')
   }
 
   return (
