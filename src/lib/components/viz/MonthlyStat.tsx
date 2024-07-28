@@ -8,6 +8,7 @@ import { startDatabase } from '../../../db/lib/migrator'
 import { useQuery, useQueryData } from '../../query/useQuery'
 import { currencyFormat } from '../../utils/currency'
 import { dateFormat } from '../../utils/date'
+import CarbonDotMark from '~icons/carbon/dot-mark'
 
 interface IMonthlyStatData {
   total_credit: number
@@ -80,11 +81,28 @@ export function AllTimeMonthlyViz() {
 
   return (
     <div className="border flex flex-col gap-4 border-base-200 rounded-lg p-4" style="--plotery-margin: 0px 16px 16px 60px;">
-      <div className="text-lg">
-        Total Cash In and Cash Out
+      <div className="flex justify-between">
+        <div className="text-sm font-semibold text-primary-content">
+          Monthly Statistics
+        </div>
+
+        <div className="inline-flex gap-2">
+          <div className="badge badge-primary badge-outline">
+            <CarbonDotMark />
+            Credit
+          </div>
+          <div className="badge badge-secondary badge-outline">
+            <CarbonDotMark />
+            Debit
+          </div>
+          <div className="badge badge-accent badge-outline">
+            <CarbonDotMark />
+            Balance
+          </div>
+        </div>
       </div>
 
-      <Chart data={pois.value}>
+      <Chart data={pois.value} class="h-72">
         <LinearAxis
           type="x"
           min={0}

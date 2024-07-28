@@ -14,8 +14,14 @@ export function useQueryData<T>(key: string[]) {
   return value
 }
 
-export function useQuery<T>(key: string[], fetcher: () => Promise<T>) {
-  const serialized = useComputed(() => JSON.stringify(key))
+export function useQuery<T>(key: string[] | (() => string[]), fetcher: () => Promise<T>) {
+  const serialized = useComputed(() => {
+    if (typeof key === 'function') {
+      return JSON.stringify(key())
+    }
+
+    return JSON.stringify(key)
+  })
 
   const invalidate = async () => {
     const result = await fetcher()

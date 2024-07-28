@@ -5,24 +5,39 @@ import { titleCase } from 'scule'
 import type { IterableElement } from 'type-fest'
 import { useCallback, useEffect, useRef } from 'preact/hooks'
 import { RangePlugin, easepick } from '@easepick/bundle'
-import type { RawBuilder } from 'kysely'
+import type { ComparisonOperatorExpression, RawBuilder, SelectQueryBuilder } from 'kysely'
 import { sql } from 'kysely'
 import { dateFormat } from '../utils/date'
+import type { Database } from '../../db/schema'
+import './rangepicker.css'
+
+export type TRange = TStaticRanges | [Date, Date]
 
 export const STATIC_RANGES = ['last_week', 'last_month', 'last_6_months', 'last_year', 'all_time'] as const
 
 export type TStaticRanges = IterableElement<typeof STATIC_RANGES>
 
-export const STATIC_RANGE_QUERIES: Record<TStaticRanges, RawBuilder<unknown>> = {
-  all_time: sql`transaction_at < date('now')`,
-  last_6_months: sql`transaction_at > date('now','-6 months')`,
-  last_month: sql`transaction_at > date('now','-30 days')`,
-  last_week: sql`transaction_at > date('now','-7 days')`,
-  last_year: sql`transaction_at > date('now','-365 days')`,
+const STATIC_RANGE_QUERIES: Record<TStaticRanges, [RawBuilder<unknown>, ComparisonOperatorExpression, RawBuilder<unknown>]> = {
+  all_time: [sql`transaction_at`, '<', sql`date('now')`],
+  last_6_months: [sql`transaction_at`, '>', sql`date('now','-6 months')`],
+  last_month: [sql`transaction_at`, '>', sql`date('now','-30 days')`],
+  last_week: [sql`transaction_at`, '>', sql`date('now','-7 days')`],
+  last_year: [sql`transaction_at`, '>', sql`date('now','-365 days')`],
+}
+
+export function withRangeQuery<Q extends SelectQueryBuilder<Database, 'transactions', object>>(qb: Q, range: TRange) {
+  if (typeof range === 'string') {
+    return qb.where(...STATIC_RANGE_QUERIES[range])
+  }
+
+  return qb.where(eb => eb.and([
+    eb(sql`transaction_at`, '>', sql`date(${range[0].toISOString()})`),
+    eb(sql`transaction_at`, '<', sql`date(${range[1].toISOString()})`),
+  ]))
 }
 
 interface IRangePickerProps {
-  range: Signal<TStaticRanges | [Date, Date]>
+  range: Signal<TRange>
 }
 
 export function RangePicker({ range }: IRangePickerProps) {
@@ -85,7 +100,7 @@ export function RangePicker({ range }: IRangePickerProps) {
 
   return (
     <div class="max-w-max relative">
-      <div role="tablist" class="tabs tabs-sm tabs-bordered">
+      <div role="tablist" class="tabs tabs-xs tabs-bordered">
         {
           STATIC_RANGES.map((value) => {
             return (

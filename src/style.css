@@ -1,3 +1,4 @@
+/* eslint-disable-next-line */
 @import "@shelacek/plotery/dist/css/plotery.css";
 
 @tailwind base;
@@ -6,8 +7,8 @@
 
 :root {
   --rounded-btn: 4px !important;
-  --rounded-box: 0.5rem !important;
-  --rounded-badge: 0.9rem !important;
+  --rounded-box: 4px !important;
+  --rounded-badge: 4px !important;
   --animation-btn: 0.25s !important;
   --animation-input: 0.2s !important;
   --btn-focus-scale: 0.95 !important;

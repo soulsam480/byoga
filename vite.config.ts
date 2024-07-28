@@ -5,6 +5,7 @@ import { comlink } from 'vite-plugin-comlink'
 import Unfonts from 'unplugin-fonts/vite'
 import inspect from 'vite-plugin-inspect'
 import { VitePWA } from 'vite-plugin-pwa'
+import Icons from 'unplugin-icons/vite'
 
 function SQLiteDevPlugin(): Plugin {
   return {
@@ -24,6 +25,11 @@ const config = defineConfig({
     inspect(),
     comlink(),
     preact(),
+    Icons({
+      autoInstall: true,
+      compiler: 'jsx',
+      jsx: 'preact',
+    }),
     SQLiteDevPlugin(),
     Unfonts({
       google: {
@@ -97,8 +103,13 @@ const config = defineConfig({
     cssMinify: 'lightningcss',
   },
   resolve: {
+    dedupe: ['preact'],
     alias: [
       { find: 'frappe-charts', replacement: 'frappe-charts/dist/frappe-charts.min.esm' },
+      { find: 'react', replacement: 'preact/compat' },
+      { find: 'react-dom/test-utils', replacement: 'preact/test-utils' },
+      { find: 'react-dom', replacement: 'preact/compat' },
+      { find: 'react/jsx-runtime', replacement: 'preact/jsx-runtime' },
     ],
   },
   optimizeDeps: {

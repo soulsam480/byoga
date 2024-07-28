@@ -1,48 +1,176 @@
 import { sql } from 'kysely'
+import { titleCase } from 'scule'
+import { useSignal, useSignalEffect } from '@preact/signals'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
 import { useQuery } from '../../query/useQuery'
 import { dateFormat } from '../../utils/date'
+import { currencyFormat } from '../../utils/currency'
+import { colorFromSeed } from '../../utils/color'
+import type { TStaticRanges } from '../RangePicker'
+import { RangePicker, withRangeQuery } from '../RangePicker'
+import type { TransactionModel } from '../../../db/schema'
+import CarbonDotMark from '~icons/carbon/dot-mark'
+import CarbonArrowUpRight from '~icons/carbon/arrow-up-right'
+import CarbonArrowDownLeft from '~icons/carbon/arrow-down-left'
+import CarbonTriangleRightSolid from '~icons/carbon/triangle-right-solid'
+import CarbonTriangleLeftSolid from '~icons/carbon/triangle-left-solid'
+import './table.css'
+
+interface ITransactionRowProps {
+  transaction: Pick<TransactionModel, 'id'
+  | 'transaction_at'
+  | 'credit'
+  | 'debit'
+  | 'balance'
+  | 'transaction_category'
+  | 'transaction_mode'
+  | 'tags' >
+}
+
+function TransactionRow({ transaction }: ITransactionRowProps) {
+  return (
+    <tr class="row">
+      <td class="inline-flex gap-1">
+        {transaction.credit === null
+          ? <CarbonArrowUpRight class="stroke-2 text-secondary" />
+          : <CarbonArrowDownLeft class="stroke-2 text-primary" />}
+        {transaction.id}
+      </td>
+
+      <td>{dateFormat(transaction.transaction_at).mmmddyyyy()}</td>
+
+      <td>
+        {transaction.credit !== null ? currencyFormat.format(transaction.credit) : '-'}
+      </td>
+
+      <td>
+        {transaction.debit !== null ? currencyFormat.format(transaction.debit) : '-'}
+      </td>
+
+      <td>
+        <span
+          className="tooltip"
+          data-tip={transaction.tags.join(', ')}
+        >
+          <span class="inline-flex gap-1">
+            <CarbonDotMark style={`color: ${colorFromSeed(transaction.transaction_category)};`} />
+            {titleCase(transaction.transaction_category)}
+          </span>
+        </span>
+      </td>
+
+      <td>
+        {titleCase(transaction.transaction_mode).toUpperCase()}
+      </td>
+
+      {transaction.balance !== null && (
+        <td>{currencyFormat.format(transaction.balance)}</td>
+      )}
+    </tr>
+  )
+}
 
 export function TransactionsTable() {
-  const { value: transactions } = useQuery(['transaction_month'], async () => {
-    await startDatabase()
+  const page = useSignal(0)
 
-    return await db
-      .selectFrom('transactions')
-      .select(['id', 'transaction_at', 'balance'])
-      .orderBy(sql`unixepoch(transaction_at)`, 'asc')
-      .execute()
+  const range = useSignal<TStaticRanges | [Date, Date]>('all_time')
+
+  useSignalEffect(() => {
+    // to subscribe
+    const _r = range.value
+
+    page.value = 0
   })
 
+  const { value: transactions } = useQuery(
+    () => ['transactions_list', JSON.stringify(range.value), page.value.toString()],
+    async () => {
+      await startDatabase()
+
+      const _range = range.value
+      const _page = page.value
+
+      return await withRangeQuery(db
+        .selectFrom('transactions'), _range)
+        .select(['id', 'transaction_at', 'credit', 'debit', 'balance', 'transaction_category', 'transaction_mode', 'tags'])
+        .orderBy(sql`unixepoch(transaction_at)`, 'asc')
+        .limit(15)
+        .offset(_page * 15)
+        .execute()
+    },
+  )
+
+  function handlePagination(dir: 'next' | 'prev' | 'reset') {
+    return () => {
+      if (dir === 'reset') {
+        page.value = 0
+      }
+      else if (dir === 'next') {
+        page.value = page.value + 1
+      }
+      else if (page.value !== 0) {
+        page.value = page.value - 1
+      }
+    }
+  }
+
   return (
-    <div className="overflow-x-auto">
-      <table className="table table-zebra table-xs">
-        {/* head */}
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Date</th>
-            <th>Balance</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            transactions.value?.map((it) => {
-              return (
-                <tr>
-                  <td>{it.id}</td>
-                  <td>{dateFormat(it.transaction_at).mmmddyyyy()}</td>
-                  {it.balance !== null && (
-                    // <td>{currencyFormat.format(it.balance)}</td>
-                    <td>{it.balance}</td>
-                  )}
-                </tr>
-              )
-            })
-          }
-        </tbody>
-      </table>
+    <div className="border border-base-200 rounded-lg">
+      <div className="flex items-center justify-between p-4 relative">
+        <div className="font-semibold text-sm">
+          All Transactions
+        </div>
+
+        <RangePicker range={range} />
+      </div>
+      <div class="overflow-x-auto max-h-96">
+        <table className="table table-zebra table-xs table-pin-rows">
+          {/* head */}
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>
+                <span class="inline-flex gap-1">
+                  <CarbonArrowDownLeft class="stroke-2 text-primary" />
+                  Credit
+                </span>
+              </th>
+              <th>
+                <span class="inline-flex gap-1">
+                  <CarbonArrowUpRight class="stroke-2 text-secondary" />
+                  Debit
+                </span>
+              </th>
+              <th>Category</th>
+              <th>Method</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              transactions.value?.map((it) => {
+                return <TransactionRow transaction={it} key={it.id} />
+              })
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex justify-end py-2 px-4">
+        <div className="join">
+          <button className="join-item btn btn-outline btn-xs" onClick={handlePagination('prev')}><CarbonTriangleLeftSolid /></button>
+          <button
+            className="join-item btn btn-primary btn-outline btn-xs"
+            onClick={handlePagination('reset')}
+          >
+            Page
+            {page.value + 1}
+          </button>
+          <button className="join-item btn btn-outline btn-xs" onClick={handlePagination('next')}><CarbonTriangleRightSolid /></button>
+        </div>
+      </div>
     </div>
   )
 }

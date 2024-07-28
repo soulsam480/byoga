@@ -1,5 +1,6 @@
 import * as R from 'remeda'
 import { useComputed } from '@preact/signals'
+import type { ChartSeriesData } from '@shelacek/plotery'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
 import type { TransactionModel } from '../../../db/schema'
@@ -42,20 +43,32 @@ export function SpendingCatoriesViz() {
   const _dataSet = useComputed(() => {
     return {
       labels: categories.value?.map(it => it[0]) ?? [],
-      datasets: [
-        {
-          values: categories.value?.map(it => it[1]) ?? [],
-        },
-      ],
+      datasets: (categories.value?.map((it, index) => [it[1], index]) ?? []) as ChartSeriesData,
     }
   })
 
   return (
-    null
-    // <Chart
-    //   data={dataSet}
-    //   type="donut"
-    //   height={450}
-    // />
+    <div className="border border-base-200 rounded-lg p-4" style="--plotery-margin: 0px 16px 16px 60px;">
+      catgroeies here
+      {/* <Chart data={dataSet.value.datasets} class="h-96">
+        <LinearAxis
+          type="y"
+          min={0}
+          max={dataSet.value.labels.length}
+          labels={index => dataSet.value.labels[index]}
+          minor
+        />
+
+        <LinearAxis
+          type="x"
+          min={0}
+          max={200000}
+          step={50000}
+          labels={value => currencyFormat.format(value)}
+          minor
+        />
+        <BarLine />
+      </Chart> */}
+    </div>
   )
 }

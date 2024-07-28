@@ -1,7 +1,8 @@
 import { Navbar } from './lib/components/Navbar'
 import { Alerts } from './lib/components/Alerts'
-import { AllTimeMonthlyViz, LastMonthDigest } from './lib/components/viz/MonthlyStat'
+import { AllTimeMonthlyViz } from './lib/components/viz/MonthlyStat'
 import { SpendingCatoriesViz } from './lib/components/viz/SpendCategoriesStat'
+import { TransactionsTable } from './lib/components/viz/TransactionsTable'
 
 // TODO: next steps for UI ?
 // // 1. file input
@@ -11,24 +12,25 @@ import { SpendingCatoriesViz } from './lib/components/viz/SpendCategoriesStat'
 
 export function App() {
   return (
-    <>
+    <main>
       <Alerts />
       <Navbar />
-      <div class="grid grid-cols-3 gap-6 p-6">
 
-        <div class="col-span-2 flex flex-col gap-6">
+      <div class="flex flex-col gap-6 p-6">
+        <div class="grid grid-cols-3 gap-6">
 
-          <LastMonthDigest />
+          <div class="col-span-2 flex flex-col gap-6">
+            {/* <LastMonthDigest /> */}
+            <AllTimeMonthlyViz />
+            <TransactionsTable />
+          </div>
 
-          <AllTimeMonthlyViz />
+          <div className="col-span-1">
+            <SpendingCatoriesViz />
+          </div>
         </div>
 
-        {/* <TransactionsTable /> */}
-
-        <div className="col-span-1">
-          <SpendingCatoriesViz />
-        </div>
       </div>
-    </>
+    </main>
   )
 }
