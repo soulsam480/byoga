@@ -273,7 +273,7 @@ type RegexpGenerator = (ctx: IntermediateMetaResult) => RegExp
 
 // ? === UPI spend ===
 const FOOD_RE
-  = /(?<tag>food|fruit|coffe|lunch|dinner|juice|sweets|curd|chicken|mutton|milk|egg|coke|coconut|iron hill|swiggy|zomato)/i
+  = /(?<tag>food|fod|fruit|coffe|lunch|dinner|juice|sweets|curd|chicken|mutton|milk|egg|coke|coconut|iron hill|swiggy|zomato)/i
 
 const BIKE_RE = /(?<tag>bike|motorcycle|suzuki)/i
 
@@ -300,7 +300,7 @@ const MERCHANT_PAYMENT_RE
 
 const AUTOPAY_RE = /(?<tag>autopay|mandate)/i
 
-const PERSONAL_RE = /(?<tag>clothes|decathlon|slipper|clothing)/i
+const PERSONAL_RE = /(?<tag>clothes|decathlon|slipper|clothing|shopping)/i
 
 const CASH_TRANSFER_RE = /(?<tag>atm cash)/i
 

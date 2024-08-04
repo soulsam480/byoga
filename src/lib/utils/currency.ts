@@ -1,1 +1,9 @@
-export const currencyFormat = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', trailingZeroDisplay: 'stripIfInteger' })
+export const currencyFormat = new Intl.NumberFormat(
+  'en-IN',
+  {
+    style: 'currency',
+    currency: 'INR',
+    trailingZeroDisplay: 'stripIfInteger',
+    notation: 'compact',
+  },
+)

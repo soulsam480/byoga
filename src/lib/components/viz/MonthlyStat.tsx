@@ -5,17 +5,10 @@ import { BarLine, CardinalLine, Chart, LinearAxis } from '@shelacek/plotery'
 import * as R from 'remeda'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
-import { useQuery, useQueryData } from '../../query/useQuery'
+import { useQuery } from '../../query/useQuery'
 import { currencyFormat } from '../../utils/currency'
 import { dateFormat } from '../../utils/date'
 import CarbonDotMark from '~icons/carbon/dot-mark'
-
-interface IMonthlyStatData {
-  total_credit: number
-  total_debit: number
-  transaction_month: string
-  monthly_balance: number | null
-}
 
 function formatMonthYear(monthStr: string | undefined | null) {
   if (typeof monthStr !== 'string')
@@ -80,9 +73,9 @@ export function AllTimeMonthlyViz() {
   })
 
   return (
-    <div className="border flex flex-col gap-4 border-base-200 rounded-lg p-4" style="--plotery-margin: 0px 16px 16px 60px;">
+    <div className="border flex flex-col gap-4 border-base-200 rounded-lg p-4">
       <div className="flex justify-between">
-        <div className="text-sm font-semibold text-primary-content">
+        <div className="text-sm font-semibold">
           Monthly Statistics
         </div>
 
@@ -102,7 +95,7 @@ export function AllTimeMonthlyViz() {
         </div>
       </div>
 
-      <Chart data={pois.value} class="h-72">
+      <Chart data={pois.value} class="h-72 monthly-stat-viz">
         <LinearAxis
           type="x"
           min={0}
@@ -116,92 +109,6 @@ export function AllTimeMonthlyViz() {
         <BarLine series="debit" />
         <CardinalLine series="balance" tension={1} />
       </Chart>
-    </div>
-  )
-}
-
-export function LastMonthDigest() {
-  const queryData = useQueryData<IMonthlyStatData[]>(['all_time_monthly_stat'])
-
-  const { value: allTimeMonthlyDeposit } = useQuery(['all_time_monthly_deposit'], async () => {
-    await startDatabase()
-
-    const results = await db
-      .selectFrom('transactions')
-      .select(eb =>
-        [
-          eb.fn.sum<number>('debit').as('total_debit'),
-          sql<string>`strftime('%m-%Y', ${eb.ref('transaction_at')})`.as('transaction_month'),
-        ])
-      .where(eb => eb.and([
-        eb('transaction_category', 'in', ['deposit']),
-        eb('credit', 'is', null),
-      ]))
-      .orderBy('transaction_month', 'asc')
-      .groupBy('transaction_month')
-      .execute()
-
-    return results
-  })
-
-  const lastMonthData = useComputed(() => {
-    const date = new Date()
-
-    const lastMonth = date.getMonth() === 1 ? 12 : `${date.getMonth()}-${date.getFullYear()}`
-
-    const data = queryData.value?.find(it => it.transaction_month.replace(/^0(.*)/, '$1') === lastMonth.toString())
-
-    const depositData = allTimeMonthlyDeposit.value?.find(it => it.transaction_month.replace(/^0(.*)/, '$1') === lastMonth.toString())
-
-    if (data === undefined || depositData === undefined)
-      return null
-
-    return {
-      ...data,
-      total_deposit: depositData.total_debit,
-    }
-  })
-
-  return (
-    <div className="stats border rounded-lg border-base-200">
-      <div className="stat px-4">
-        {/* <div className="stat-figure text-primary">
-         icon
-        </div> */}
-        <div className="stat-title">Cash in</div>
-        <div className="stat-value text-primary">
-          {lastMonthData.value?.total_credit
-            ? currencyFormat.format(lastMonthData.value.total_credit)
-            : '-'}
-        </div>
-        {/* <div className="stat-desc">21% more than last month</div> */}
-      </div>
-
-      <div className="stat px-4">
-        {/* <div className="stat-figure text-secondary">
-        icon
-        </div> */}
-        <div className="stat-title">Cash out</div>
-        <div className="stat-value text-secondary">
-          {lastMonthData.value?.total_debit
-            ? currencyFormat.format(lastMonthData.value.total_debit)
-            : '-'}
-        </div>
-        {/* <div className="stat-desc">21% more than last month</div> */}
-      </div>
-
-      <div className="stat px-4">
-        {/* <div className="stat-figure text-secondary">
-         icon
-        </div> */}
-        <div className="stat-title">Investments</div>
-        <div className="stat-value text-accent">
-          {lastMonthData.value?.total_deposit
-            ? currencyFormat.format(lastMonthData.value.total_deposit)
-            : '-'}
-        </div>
-        {/* <div className="stat-desc text-secondary">31 tasks remaining</div> */}
-      </div>
     </div>
   )
 }

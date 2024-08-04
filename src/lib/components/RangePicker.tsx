@@ -36,6 +36,18 @@ export function withRangeQuery<Q extends SelectQueryBuilder<Database, 'transacti
   ]))
 }
 
+export function getRangeDisplayValue(range: TRange, showStatic = false) {
+  if (!Array.isArray(range)) {
+    if (showStatic) {
+      return titleCase(range)
+    }
+
+    return 'Custom'
+  }
+
+  return `From ${dateFormat(range[0]).ddmmyyyy()} To ${dateFormat(range[1]).ddmmyyyy()}`
+}
+
 interface IRangePickerProps {
   range: Signal<TRange>
 }
@@ -44,13 +56,7 @@ export function RangePicker({ range }: IRangePickerProps) {
   const datePicker = useRef<HTMLInputElement>(null)
   const picker = useRef<easepick.Core>(null)
 
-  const rangeDisplayValue = useComputed(() => {
-    if (!Array.isArray(range.value)) {
-      return 'Custom'
-    }
-
-    return `From ${dateFormat(range.value[0]).ddmmyyyy()} To ${dateFormat(range.value[1]).ddmmyyyy()}`
-  })
+  const rangeDisplayValue = useComputed(() => getRangeDisplayValue(range.value))
 
   useSignalEffect(() => {
     if (!Array.isArray(range.value)) {
@@ -107,7 +113,7 @@ export function RangePicker({ range }: IRangePickerProps) {
               <span
                 key={value}
                 role="tab"
-                className={clsx(['tab hover:text-primary-content', range.value === value && 'tab-active'])}
+                className={clsx(['tab', range.value === value && 'tab-active font-semibold'])}
                 style="--tab-padding: 8px;"
                 onClick={() => {
                   range.value = value
@@ -121,7 +127,7 @@ export function RangePicker({ range }: IRangePickerProps) {
 
         <span
           role="tab"
-          className={clsx(['tab hover:text-primary-content relative', Array.isArray(range.value) && 'tab-active'])}
+          className={clsx(['tab relative', Array.isArray(range.value) && 'tab-active font-semibold'])}
           style="--tab-padding: 8px;"
           onClick={handleCustomClick}
         >

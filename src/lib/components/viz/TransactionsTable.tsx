@@ -1,6 +1,6 @@
 import { sql } from 'kysely'
 import { titleCase } from 'scule'
-import { useSignal, useSignalEffect } from '@preact/signals'
+import { useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
 import { useQuery } from '../../query/useQuery'
@@ -8,14 +8,13 @@ import { dateFormat } from '../../utils/date'
 import { currencyFormat } from '../../utils/currency'
 import { colorFromSeed } from '../../utils/color'
 import type { TStaticRanges } from '../RangePicker'
-import { RangePicker, withRangeQuery } from '../RangePicker'
+import { RangePicker, getRangeDisplayValue, withRangeQuery } from '../RangePicker'
 import type { TransactionModel } from '../../../db/schema'
 import CarbonDotMark from '~icons/carbon/dot-mark'
 import CarbonArrowUpRight from '~icons/carbon/arrow-up-right'
 import CarbonArrowDownLeft from '~icons/carbon/arrow-down-left'
 import CarbonTriangleRightSolid from '~icons/carbon/triangle-right-solid'
 import CarbonTriangleLeftSolid from '~icons/carbon/triangle-left-solid'
-import './table.css'
 
 interface ITransactionRowProps {
   transaction: Pick<TransactionModel, 'id'
@@ -93,13 +92,30 @@ export function TransactionsTable() {
 
       return await withRangeQuery(db
         .selectFrom('transactions'), _range)
-        .select(['id', 'transaction_at', 'credit', 'debit', 'balance', 'transaction_category', 'transaction_mode', 'tags'])
+        .select(
+          eb => [
+            'id',
+            'transaction_at',
+            'credit',
+            'debit',
+            'balance',
+            'transaction_category',
+            'transaction_mode',
+            'tags',
+            withRangeQuery(eb
+              .selectFrom('transactions'), _range)
+              .select(_eb => [_eb.fn.count('id').as('transactions_count')])
+              .as('transactions_count'),
+          ],
+        )
         .orderBy(sql`unixepoch(transaction_at)`, 'asc')
         .limit(15)
         .offset(_page * 15)
         .execute()
     },
   )
+
+  const total = useComputed(() => transactions.value?.[0]?.transactions_count ?? 0)
 
   function handlePagination(dir: 'next' | 'prev' | 'reset') {
     return () => {
@@ -116,13 +132,25 @@ export function TransactionsTable() {
   }
 
   return (
-    <div className="border border-base-200 rounded-lg">
-      <div className="flex items-center justify-between p-4 relative">
-        <div className="font-semibold text-sm">
-          All Transactions
+    <div className="border border-base-200 rounded-lg flex flex-col gap-4">
+      <div className="font-semibold text-sm px-4 pt-4">
+        Transactions
+      </div>
+      <div className="flex items-center justify-between px-4 relative">
+        <div class="text-xs">
+          Showing
+          {' '}
+          {Math.min(Number(total.value), 15)}
+          {' '}
+          of
+          {' '}
+          {total}
+          {' '}
+          transactions
         </div>
 
         <RangePicker range={range} />
+
       </div>
       <div class="overflow-x-auto max-h-96">
         <table className="table table-zebra table-xs table-pin-rows">
@@ -156,6 +184,16 @@ export function TransactionsTable() {
             }
           </tbody>
         </table>
+
+        {
+          !transactions.value?.length && (
+            <div class="text-center text-sm py-8">
+              No transactions for
+              {' '}
+              {getRangeDisplayValue(range.value, true)}
+            </div>
+          )
+        }
       </div>
 
       <div class="flex justify-end py-2 px-4">

@@ -1,17 +1,15 @@
 import * as R from 'remeda'
 import { useComputed } from '@preact/signals'
-import type { ChartSeriesData } from '@shelacek/plotery'
-import { Chart, LinearAxis } from '@shelacek/plotery'
-import { titleCase } from 'scule'
+import { Chart, type ChartSeriesData, LinearAxis } from '@shelacek/plotery'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
-import type { TransactionModel } from '../../../db/schema'
 import { useQuery } from '../../query/useQuery'
+import type { TransactionModel } from '../../../db/schema'
 import { currencyFormat } from '../../utils/currency'
 import { ByogaHorizontalBar } from '../plotery/BarLine'
 
-export function SpendingCatoriesViz() {
-  const { value: categories } = useQuery([`spend_category_volume`], async () => {
+export function SpendModesViz() {
+  const { value: modes } = useQuery(['spend_mode_volume'], async () => {
     await startDatabase()
 
     const results = await db
@@ -24,10 +22,10 @@ export function SpendingCatoriesViz() {
       ]))
       .select(eb =>
         [
-          'transaction_category',
+          'transaction_mode',
           eb.fn.sum<number>('debit').as('total_debit'),
         ])
-      .groupBy('transaction_category')
+      .groupBy('transaction_mode')
       .execute()
 
     return R.pipe(
@@ -37,42 +35,42 @@ export function SpendingCatoriesViz() {
       ),
       R.reduce((acc, curr) => {
         acc.push([
-          curr.transaction_category,
+          curr.transaction_mode,
           curr.total_debit,
         ])
         return acc
-      }, [] as [TransactionModel['transaction_category'], number][]),
+      }, [] as [TransactionModel['transaction_mode'], number][]),
     )
   })
 
   const dataSet = useComputed(() => {
     return {
-      labels: categories.value?.map(it => it[0]) ?? [],
-      datasets: (categories.value?.map((it, index) => [it[1], index]) ?? []) as ChartSeriesData,
+      labels: modes.value?.map(it => it[0]) ?? [],
+      datasets: (modes.value?.map((it, index) => [it[1], index]) ?? []) as ChartSeriesData,
     }
   })
 
   return (
-    <div className="border border-base-200 rounded-lg p-4 spend-categories-viz flex flex-col gap-4">
+    <div className="border border-base-200 rounded-lg p-4 spend-modes-viz flex flex-col gap-4">
       <div className="text-sm font-semibold">
-        Spend Categories
+        Spend Transaction mediums
       </div>
 
-      <Chart data={dataSet.value.datasets} class="h-96">
+      <Chart data={dataSet.value.datasets} class="h-60">
         <LinearAxis
           type="y"
           min={0}
           step={1}
           max={dataSet.value.labels.length}
-          labels={index => titleCase(dataSet.value.labels[index])}
+          labels={index => (dataSet.value.labels[index])?.toUpperCase()}
           major
         />
 
         <LinearAxis
           type="x"
           min={0}
-          max={200000}
-          step={50000}
+          max={1000000}
+          step={100000}
           labels={value => currencyFormat.format(value)}
           minor
           major

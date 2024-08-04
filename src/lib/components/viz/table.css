@@ -1,4 +1,0 @@
-.row:hover td .tooltip:before {
-  opacity: 1;
-  transition-delay: 75ms;
-}
