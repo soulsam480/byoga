@@ -71,7 +71,7 @@ export function SpendingCatoriesViz() {
         <LinearAxis
           type="x"
           min={0}
-          max={200000}
+          max={300000}
           step={50000}
           labels={value => currencyFormat.format(value)}
           minor

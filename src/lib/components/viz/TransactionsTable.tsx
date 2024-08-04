@@ -73,7 +73,7 @@ function TransactionRow({ transaction }: ITransactionRowProps) {
 export function TransactionsTable() {
   const page = useSignal(0)
 
-  const range = useSignal<TStaticRanges | [Date, Date]>('all_time')
+  const range = useSignal<TStaticRanges | [Date, Date]>('last_week')
 
   useSignalEffect(() => {
     // to subscribe
