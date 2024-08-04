@@ -14,4 +14,4 @@
 - will change over time
 
 1. Home screen after transactions are imported
-![image](https://github.com/user-attachments/assets/72dfb042-87cd-429f-bb31-562647208a17)
+<img width="1484" alt="image" src="https://github.com/user-attachments/assets/faf3290f-c806-4a06-848c-a24a2b74d46e">
