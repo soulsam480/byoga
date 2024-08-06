@@ -1,13 +1,15 @@
 import { sql } from 'kysely'
 import { useComputed } from '@preact/signals'
 import type { ChartData, ChartSeriesData } from '@shelacek/plotery'
-import { BarLine, CardinalLine, Chart, LinearAxis } from '@shelacek/plotery'
+import { BarLine, CardinalLine, Chart, LinearAxis, Tooltip } from '@shelacek/plotery'
 import * as R from 'remeda'
+import { titleCase } from 'scule'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
 import { useQuery } from '../../query/useQuery'
 import { currencyFormat } from '../../utils/currency'
 import { dateFormat } from '../../utils/date'
+import { ByogaToolTip } from '../plotery/ToolTip'
 import CarbonDotMark from '~icons/carbon/dot-mark'
 
 function formatMonthYear(monthStr: string | undefined | null) {
@@ -108,6 +110,14 @@ export function AllTimeMonthlyViz() {
         <BarLine series="credit" />
         <BarLine series="debit" />
         <CardinalLine series="balance" tension={1} />
+
+        <Tooltip>
+          <ByogaToolTip
+            renderText={(data) => {
+              return `${titleCase(data[0])}: ${currencyFormat.format(data[1][1])}`
+            }}
+          />
+        </Tooltip>
       </Chart>
     </div>
   )
