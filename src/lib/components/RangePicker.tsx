@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef } from 'preact/hooks'
 import { RangePlugin, easepick } from '@easepick/bundle'
 import type { ComparisonOperatorExpression, RawBuilder, SelectQueryBuilder } from 'kysely'
 import { sql } from 'kysely'
+import easepickStyle from '@easepick/bundle/dist/index.css?url'
 import { dateFormat } from '../utils/date'
 import type { Database } from '../../db/schema'
 import './rangepicker.css'
@@ -72,8 +73,7 @@ export function RangePicker({ range }: IRangePickerProps) {
     picker.current = new easepick.create({
       element: datePicker.current,
       css: [
-        'https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css',
-        'https://cdn.jsdelivr.net/npm/@easepick/range-plugin@1.2.1/dist/index.css',
+        easepickStyle,
       ],
       plugins: [RangePlugin],
       RangePlugin: {
@@ -125,7 +125,6 @@ export function RangePicker({ range }: IRangePickerProps) {
           })
         }
 
-        {/*
         <span
           role="tab"
           className={clsx(['tab relative', Array.isArray(range.value) && 'tab-active font-semibold'])}
@@ -139,7 +138,6 @@ export function RangePicker({ range }: IRangePickerProps) {
           />
           {rangeDisplayValue}
         </span>
-         */}
       </div>
 
     </div>

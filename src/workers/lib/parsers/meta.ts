@@ -273,40 +273,40 @@ type RegexpGenerator = (ctx: IntermediateMetaResult) => RegExp
 
 // ? === UPI spend ===
 const FOOD_RE
-  = /(?<tag>food|fod|fruit|coffe|lunch|dinner|juice|sweets|curd|chicken|mutton|milk|egg|coke|coconut|iron hill|swiggy|zomato)/i
+  = /(?<tag>food|fod|foos|fruit|coffe|lunch|dinner|juice|sweets|curd|chicken|mutton|milk|egg|coke|coconut|choco|iron\shill|swiggy|zomato)/i
 
-const BIKE_RE = /(?<tag>bike|motorcycle|suzuki)/i
+const BIKE_RE = /(?<tag>bike|motorcycle|suzuki|parking|balaklava)/i
 
 const DOMESTIC_SPEND_RE
-  = /(?<tag>house|rent|water|service|fiber|cutlery|DTH|airtel)/i
+  = /(?<tag>house|rent|water|service|fiber|cutlery|DTH|airtel|jio|recharge|station[ae]ry|filter|puja|murthy)/i
 
-const DEPOSIT_RE = /(?<tag>RD|SBI|[Dd]eposit|Zerodha)/
+const DEPOSIT_RE = /(?<tag>RD|SBI|[Dd]eposit|Zerodha|SIP|LIC|Lic|lic)/
 
 const ONLINE_SHOPPING_RE = /(?<tag>amazon|flipkart|online|order)/i
 
-const PETROL_RE = /(?<tag>petrol|fuel)/i
+const PETROL_RE = /(?<tag>petrol|fuel|pretol)/i
 
-const GROCERY_RE = /(?<tag>grocery|vegetable)/i
+const GROCERY_RE = /(?<tag>grocery|vegetable|bag|polythene)/i
 
 const TRANSPORT_RE
   = /(?<tag>transport|taxi|bus|fare|cab|uber|rapido|cleartrip)/i
 
 const MEDICAL_RE = /(?<tag>medicine|medical|health|check up)/i
 
-const ENTERTAINMENT_RE = /(?<tag>film)/i
+const ENTERTAINMENT_RE = /(?<tag>film|haikyuu)/i
 
 const MERCHANT_PAYMENT_RE
-  = /(?<tag>merchant|UPIIntent|PhonePe|Razorpay|BharatPe|FEDERAL EASYPAYMENTS|[Oo]nline|[Pp]ayment|[Tt]ransaction|UPI|[Cc]collect|request)/
+  = /(?<tag>merchant|UPIIntent|PhonePe|Razorpay|BharatPe|FEDERAL\sEASYPAYMENTS|[Oo]nline|[Pp]ayment|[Tt]ransaction|UPI|[Cc]collect|request|[Pp]ay\s[Tt]o)/
 
 const AUTOPAY_RE = /(?<tag>autopay|mandate)/i
 
-const PERSONAL_RE = /(?<tag>clothes|decathlon|slipper|clothing|shopping)/i
+const PERSONAL_RE = /(?<tag>clothes|decathlon|slipper|clothing|shopping|allowance)/i
 
-const CASH_TRANSFER_RE = /(?<tag>atm cash)/i
+const CASH_TRANSFER_RE = /(?<tag>atm\scash|cash|transfer|refund|lend)/i
 
 // ? === Auto payment ===
 
-const NACH_RE = /(?<tag>indian clearing corp)/i
+const NACH_RE = /(?<tag>indian\sclearing\scorp)/i
 
 // ? === ATM ===
 const ATM_RE: RegexpGenerator = ctx =>
@@ -316,7 +316,7 @@ const ATM_RE: RegexpGenerator = ctx =>
   )
 
 // ? === transfer ===
-const SALARY_RE = /(?<tag>rzpx private)/i
+const SALARY_RE = /(?<tag>rzpx\sprivate)/i
 
 const NEFT_RE: RegexpGenerator = ctx =>
   new RegExp(`NEFT\/${ctx.transaction_ref ?? ''}\/(?<tag>[\\w\\s-]+)`)
