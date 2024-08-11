@@ -125,6 +125,7 @@ export function RangePicker({ range }: IRangePickerProps) {
           })
         }
 
+        {/*
         <span
           role="tab"
           className={clsx(['tab relative', Array.isArray(range.value) && 'tab-active font-semibold'])}
@@ -138,6 +139,7 @@ export function RangePicker({ range }: IRangePickerProps) {
           />
           {rangeDisplayValue}
         </span>
+         */}
       </div>
 
     </div>
