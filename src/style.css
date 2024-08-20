@@ -79,3 +79,7 @@
     stroke-dashoffset: 0;
   }
 }
+
+.hover-emphasis {
+  @apply text-neutral/40 group-hover:text-neutral transition-colors ease-out duration-200;
+}

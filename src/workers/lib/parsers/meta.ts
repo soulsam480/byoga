@@ -250,18 +250,25 @@ function execRegexp(regexp: RegExp, category: TTransactionCategory) {
 
       // everything else
       default:
-        match = ctx.parts.at(-1)?.match(regexp)?.groups?.tag ?? null
+      {
+        const { tag_cat = null, tag = null } = ctx.parts.at(-1)?.match(regexp)?.groups ?? {}
+
+        match = tag_cat ?? tag
 
         break
+      }
     }
 
     // after parsing if match found, take current category and add match as tag
     if (match !== null) {
       ctx.categories.add(category)
-      ctx.tags.add(match)
+
+      if (ctx.tags.size === 0) {
+        ctx.tags.add(match)
+      }
     }
     // otherwise put last chunk as tag and move on
-    else if (ctx.parts.at(-1) !== undefined) {
+    else if (ctx.tags.size === 0 && ctx.parts.at(-1) !== undefined) {
       ctx.tags.add(ctx.parts[ctx.parts.length - 1])
     }
 
@@ -272,13 +279,12 @@ function execRegexp(regexp: RegExp, category: TTransactionCategory) {
 type RegexpGenerator = (ctx: IntermediateMetaResult) => RegExp
 
 // ? === UPI spend ===
-const FOOD_RE
-  = /(?<tag>food|fod|foos|fruit|coffe|lunch|dinner|juice|sweets|curd|chicken|mutton|milk|egg|coke|coconut|choco|iron\shill|swiggy|zomato)/i
+const FOOD_RE = /^food\s(?<tag_cat>\w+)|(?<tag>food|fod|fpod|foos|dood|fruit|coffe|lunch|dinner|juice|sweets|curd|chicken|mutton|milk|egg|coke|coconut|choco[a-z]+|iron\shill|swiggy|zomato)/i
 
-const BIKE_RE = /(?<tag>bike|motorcycle|suzuki|parking|balaklava)/i
+const BIKE_RE = /^bike\s(?<tag_cat>\w+)|(?<tag>bike|motorcycle|suzuki|parking|balaklava)/i
 
 const DOMESTIC_SPEND_RE
-  = /(?<tag>house|rent|water|service|fiber|cutlery|DTH|airtel|jio|recharge|station[ae]ry|filter|puja|murthy)/i
+  = /^house\s(?<tag_cat>\w+)|(?<tag>house|rent|water|warer|service|fiber|cutlery|DTH|airtel|jio|recharge|station[ae]ry|filter|puja|murthy)/i
 
 const DEPOSIT_RE = /(?<tag>RD|SBI|[Dd]eposit|Zerodha|SIP|LIC|Lic|lic)/
 
@@ -286,23 +292,23 @@ const ONLINE_SHOPPING_RE = /(?<tag>amazon|flipkart|online|order)/i
 
 const PETROL_RE = /(?<tag>petrol|fuel|pretol)/i
 
-const GROCERY_RE = /(?<tag>grocery|vegetable|bag|polythene)/i
+const GROCERY_RE = /^grocery\s(?<tag_cat>\w+)|(?<tag>grocery|vegetable|bag|polythene)/i
 
 const TRANSPORT_RE
   = /(?<tag>transport|taxi|bus|fare|cab|uber|rapido|cleartrip)/i
 
-const MEDICAL_RE = /(?<tag>medicine|medical|health|check up)/i
+const MEDICAL_RE = /^medical\s(?<tag_cat>\w+)|(?<tag>medicine|medical|health|check up)/i
 
 const ENTERTAINMENT_RE = /(?<tag>film|haikyuu)/i
 
 const MERCHANT_PAYMENT_RE
-  = /(?<tag>merchant|UPIIntent|PhonePe|Razorpay|BharatPe|FEDERAL\sEASYPAYMENTS|[Oo]nline|[Pp]ayment|[Tt]ransaction|UPI|[Cc]collect|request|[Pp]ay\s[Tt]o)/
+  = /(?<tag>merchant|UPIIntent|PhonePe|Razorpay|BharatPe|FEDERAL\sEASYPAYMENTS|[Oo]nline|[Pp]ayment|[Tt]ransaction|UPI|[Cc]collect|request|[Pp]ay\s[Tt]o|DYNAMICQR|YESB)/
 
 const AUTOPAY_RE = /(?<tag>autopay|mandate)/i
 
-const PERSONAL_RE = /(?<tag>clothes|decathlon|slipper|clothing|shopping|allowance)/i
+const PERSONAL_RE = /(?:(?:personal|shopping)\s(?<tag_cat>\w+))?(?<tag>clothes|decathlon|slipper|clothing|shopping|allowance|stuff)/i
 
-const CASH_TRANSFER_RE = /(?<tag>atm\scash|cash|transfer|refund|lend)/i
+const CASH_TRANSFER_RE = /^transfer\s(?<tag_cat>\w+)|(?<tag>atm\scash|cash|transfer|refund|lend)/i
 
 // ? === Auto payment ===
 

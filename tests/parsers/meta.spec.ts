@@ -1,4 +1,5 @@
 import * as R from 'remeda'
+import { describe, expect, it } from 'vitest'
 import {
   type IntermediateMetaResult,
   parseAdditionalMeta,
@@ -66,6 +67,11 @@ describe('parsers/parseAdditionalMeta', () => {
         'coke',
         'coconut',
         'mutton',
+        'food sweets',
+        'food chocolate',
+        'out lunch',
+        'hotel dinner',
+        'food dinner',
       ]
 
       it('extracts categories', () => {

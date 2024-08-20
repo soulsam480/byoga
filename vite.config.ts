@@ -117,7 +117,6 @@ const config = defineConfig({
   },
   test: {
     include: ['tests/**/*.spec.ts'],
-    globals: true,
     coverage: {
       provider: 'v8',
     },
