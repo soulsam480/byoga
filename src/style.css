@@ -65,14 +65,18 @@
   transition-delay: 75ms;
 }
 
-.plotery .plot path.line {
-  stroke-dasharray: 1500;
-  animation: dash 2s linear forwards;
+.hover-emphasis {
+  @apply text-neutral/40 group-hover:text-neutral transition-colors ease-out duration-200;
+}
+
+.line-animation {
+  stroke-dasharray: 2000;
+  animation: dash 2s ease-in-out forwards;
 }
 
 @keyframes dash {
   from {
-    stroke-dashoffset: 1500;
+    stroke-dashoffset: 2000;
   }
 
   to {
@@ -80,6 +84,17 @@
   }
 }
 
-.hover-emphasis {
-  @apply text-neutral/40 group-hover:text-neutral transition-colors ease-out duration-200;
+.bar-animation {
+  stroke-dasharray: 2000;
+  animation: bars 0.5s cubic-bezier(0.42, 0, 0.12, 1) both;
+}
+
+@keyframes bars {
+  from {
+    stroke-dashoffset: -100;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
 }

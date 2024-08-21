@@ -1,5 +1,5 @@
 import { sql } from 'kysely'
-import { useComputed } from '@preact/signals'
+import { useComputed, useSignalEffect } from '@preact/signals'
 import type { ChartData, ChartSeriesData } from '@shelacek/plotery'
 import { BarLine, CardinalLine, Chart, LinearAxis, Tooltip } from '@shelacek/plotery'
 import * as R from 'remeda'
@@ -74,8 +74,30 @@ export function AllTimeMonthlyViz() {
     )
   })
 
+  useSignalEffect(() => {
+    const _d = pois.value
+
+    setTimeout(() => {
+      document.querySelectorAll('.monthly-stat .plot.cartesian.bar').forEach((el) => {
+        el.classList.remove('bar-animation')
+
+        window.setTimeout(() => {
+          el.classList.add('bar-animation')
+        })
+      })
+
+      document.querySelectorAll('.monthly-stat .plot.cartesian.line').forEach((el) => {
+        el.classList.remove('line-animation')
+
+        window.setTimeout(() => {
+          el.classList.add('line-animation')
+        })
+      })
+    })
+  })
+
   return (
-    <div className="border flex flex-col gap-4 border-base-200 rounded-lg p-4">
+    <div className="monthly-stat border flex flex-col gap-4 border-base-200 rounded-lg p-4">
       <div className="flex justify-between">
         <div className="text-sm font-semibold">
           Monthly Statistics

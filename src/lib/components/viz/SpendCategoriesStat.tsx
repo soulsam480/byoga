@@ -1,5 +1,5 @@
 import * as R from 'remeda'
-import { useComputed, useSignal } from '@preact/signals'
+import { useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import type { ChartSeriesData } from '@shelacek/plotery'
 import { Chart, LinearAxis } from '@shelacek/plotery'
 import { titleCase } from 'scule'
@@ -61,8 +61,24 @@ export function SpendingCatoriesViz() {
     }
   })
 
+  useSignalEffect(() => {
+    const _d = dataSet.value
+
+    setTimeout(() => {
+      document
+        .querySelectorAll('.spend-category-viz .plot.cartesian.bar path')
+        .forEach((el) => {
+          el.classList.remove('bar-animation')
+
+          window.setTimeout(() => {
+            el.classList.add('bar-animation')
+          })
+        })
+    })
+  })
+
   return (
-    <div className="border border-base-200 rounded-lg p-4 spend-categories-viz flex flex-col gap-4">
+    <div className="spend-category-viz border border-base-200 rounded-lg p-4 spend-categories-viz flex flex-col gap-4">
       <div className="text-sm font-semibold">
         Spend Categories
       </div>

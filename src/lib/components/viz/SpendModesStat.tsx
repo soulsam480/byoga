@@ -1,5 +1,5 @@
 import * as R from 'remeda'
-import { useComputed, useSignal } from '@preact/signals'
+import { useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import { Chart, type ChartSeriesData, LinearAxis } from '@shelacek/plotery'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
@@ -59,8 +59,24 @@ export function SpendModesViz() {
     }
   })
 
+  useSignalEffect(() => {
+    const _d = dataSet.value
+
+    setTimeout(() => {
+      document
+        .querySelectorAll('.spend-modes-viz .plot.cartesian.bar path')
+        .forEach((el) => {
+          el.classList.remove('bar-animation')
+
+          window.setTimeout(() => {
+            el.classList.add('bar-animation')
+          })
+        })
+    })
+  })
+
   return (
-    <div className="border border-base-200 rounded-lg p-4 spend-modes-viz flex flex-col gap-4">
+    <div className="spend-modes-viz border border-base-200 rounded-lg p-4 spend-modes-viz flex flex-col gap-4">
       <div className="text-sm font-semibold">
         Spend Transaction mediums
       </div>
