@@ -253,7 +253,14 @@ function execRegexp(regexp: RegExp, category: TTransactionCategory) {
       {
         const { tag_cat = null, tag = null } = ctx.parts.at(-1)?.match(regexp)?.groups ?? {}
 
-        match = tag_cat ?? tag
+        // 1. if meta starts with category, we can directly take everything after whitespace
+        if (tag_cat) {
+          match = ctx.transaction.Particulars.split(' ').slice(1).join(' ').trim()
+        }
+        // 2. else treat capture as tag
+        else {
+          match = tag
+        }
 
         break
       }
