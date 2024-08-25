@@ -1,5 +1,5 @@
 import * as R from 'remeda'
-import { useComputed, useSignal, useSignalEffect } from '@preact/signals'
+import { useComputed, useSignal } from '@preact/signals'
 import type { ChartSeriesData } from '@shelacek/plotery'
 import { Chart, LinearAxis } from '@shelacek/plotery'
 import { titleCase } from 'scule'
@@ -7,10 +7,11 @@ import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
 import type { TransactionModel } from '../../../db/schema'
 import { useQuery } from '../../query/useQuery'
-import { currencyFormat } from '../../utils/currency'
+import { formatCurrency } from '../../utils/currency'
 import { ByogaHorizontalBar } from '../plotery/BarLine'
 import type { TStaticRanges } from '../RangePicker'
 import { RangePicker, withRangeQuery } from '../RangePicker'
+import { useAnimationComp } from '../../hooks/useAnimationComp'
 
 export function SpendingCatoriesViz() {
   const range = useSignal<TStaticRanges | [Date, Date]>('last_month')
@@ -61,21 +62,7 @@ export function SpendingCatoriesViz() {
     }
   })
 
-  useSignalEffect(() => {
-    const _d = dataSet.value
-
-    setTimeout(() => {
-      document
-        .querySelectorAll('.spend-category-viz .plot.cartesian.bar path')
-        .forEach((el) => {
-          el.classList.remove('bar-animation')
-
-          window.setTimeout(() => {
-            el.classList.add('bar-animation')
-          })
-        })
-    })
-  })
+  useAnimationComp('.spend-category-viz', dataSet)
 
   return (
     <div className="spend-category-viz border border-base-200 rounded-lg p-4 spend-categories-viz flex flex-col gap-4">
@@ -102,7 +89,7 @@ export function SpendingCatoriesViz() {
           min={0}
           max={300000}
           step={50000}
-          labels={value => currencyFormat.format(value)}
+          labels={formatCurrency}
           minor
           major
         />

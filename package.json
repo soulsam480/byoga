@@ -65,7 +65,8 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "@shelacek/plotery@1.1.1": "patches/@shelacek__plotery@1.1.1.patch"
+      "@shelacek/plotery@1.1.1": "patches/@shelacek__plotery@1.1.1.patch",
+      "@easepick/bundle@1.2.1": "patches/@easepick__bundle@1.2.1.patch"
     }
   }
 }

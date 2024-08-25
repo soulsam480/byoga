@@ -1,5 +1,5 @@
 import { sql } from 'kysely'
-import { useComputed, useSignalEffect } from '@preact/signals'
+import { useComputed } from '@preact/signals'
 import type { ChartData, ChartSeriesData } from '@shelacek/plotery'
 import { BarLine, CardinalLine, Chart, LinearAxis, Tooltip } from '@shelacek/plotery'
 import * as R from 'remeda'
@@ -7,9 +7,10 @@ import { titleCase } from 'scule'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
 import { useQuery } from '../../query/useQuery'
-import { currencyFormat } from '../../utils/currency'
 import { dateFormat } from '../../utils/date'
 import { ByogaToolTip } from '../plotery/ToolTip'
+import { formatCurrency } from '../../utils/currency'
+import { useAnimationComp } from '../../hooks/useAnimationComp'
 import CarbonDotMark from '~icons/carbon/dot-mark'
 
 function formatMonthYear(monthStr: string | undefined | null) {
@@ -74,27 +75,7 @@ export function AllTimeMonthlyViz() {
     )
   })
 
-  useSignalEffect(() => {
-    const _d = pois.value
-
-    setTimeout(() => {
-      document.querySelectorAll('.monthly-stat .plot.cartesian.bar').forEach((el) => {
-        el.classList.remove('bar-animation')
-
-        window.setTimeout(() => {
-          el.classList.add('bar-animation')
-        })
-      })
-
-      document.querySelectorAll('.monthly-stat .plot.cartesian.line').forEach((el) => {
-        el.classList.remove('line-animation')
-
-        window.setTimeout(() => {
-          el.classList.add('line-animation')
-        })
-      })
-    })
-  })
+  useAnimationComp('.monthly-stat', pois)
 
   return (
     <div className="monthly-stat border flex flex-col gap-4 border-base-200 rounded-lg p-4">
@@ -128,7 +109,7 @@ export function AllTimeMonthlyViz() {
           major
           minor
         />
-        <LinearAxis type="y" min={0} max={400000} major labels={value => currencyFormat.format(value)} />
+        <LinearAxis type="y" min={0} max={400000} major labels={value => formatCurrency(value)} />
         <BarLine series="credit" />
         <BarLine series="debit" />
         <CardinalLine series="balance" tension={1} />
@@ -136,7 +117,7 @@ export function AllTimeMonthlyViz() {
         <Tooltip>
           <ByogaToolTip
             renderText={(data) => {
-              return `${titleCase(data[0])}: ${currencyFormat.format(data[1][1])}`
+              return `${titleCase(data[0])}: ${formatCurrency(data[1][1])}`
             }}
           />
         </Tooltip>

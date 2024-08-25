@@ -2,6 +2,7 @@ import { signal } from '@preact/signals'
 import clsx from 'clsx'
 import type { JSX } from 'preact/compat'
 import { createPortal } from 'preact/compat'
+import { tick } from '../utils/tick'
 
 interface IAlert {
   type: 'success' | 'warning' | 'info' | 'error'
@@ -13,7 +14,7 @@ const alerts = signal<IAlert[]>([])
 export function showAlert(alert: IAlert) {
   alerts.value.push(alert)
 
-  window.setTimeout(() => {
+  tick().then(() => {
     const result = alerts.value.slice()
 
     result.shift()
@@ -21,7 +22,7 @@ export function showAlert(alert: IAlert) {
     alerts.value = result
 
     return result
-  }, 2000)
+  })
 }
 
 const ALERT_TO_CLASS_MAP: Record<IAlert['type'], string> = {

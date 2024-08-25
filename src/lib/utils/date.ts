@@ -11,34 +11,34 @@ export function isToday(date: Date) {
 export function dateFormat(date: Date) {
   return {
     hhmm() {
-      return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+      return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
     },
     ddmmyyyy() {
-      return date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      return date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })
     },
     ddmmyyyyhhmm() {
       return `${this.ddmmyyyy()} ${this.hhmm()}`
     },
     mmmdd() {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
     },
     mmmddyyyy() {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })
     },
     mmmddyyyyhhmm() {
       return `${this.mmmddyyyy()} ${this.hhmm()}`
     },
     dd() {
-      return date.toLocaleDateString('en-US', { day: 'numeric' })
+      return date.toLocaleDateString('en-IN', { day: 'numeric' })
     },
     mmm() {
-      return date.toLocaleString('en-US', { month: 'short' })
+      return date.toLocaleString('en-IN', { month: 'short' })
     },
     mmmm() {
-      return date.toLocaleString('en-US', { month: 'long' })
+      return date.toLocaleString('en-IN', { month: 'long' })
     },
     mmmyy() {
-      return date.toLocaleString('en-US', { month: 'short', year: '2-digit' })
+      return date.toLocaleString('en-IN', { month: 'short', year: '2-digit' })
     },
   }
 }

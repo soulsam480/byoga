@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
+  '@easepick/bundle@1.2.1':
+    hash: chmv2obm3h4dyzc57r35izacge
+    path: patches/@easepick__bundle@1.2.1.patch
   '@shelacek/plotery@1.1.1':
     hash: 4cacljttts6ydyfjbp34fqnesu
     path: patches/@shelacek__plotery@1.1.1.patch
@@ -15,7 +18,7 @@ importers:
     dependencies:
       '@easepick/bundle':
         specifier: ^1.2.1
-        version: 1.2.1
+        version: 1.2.1(patch_hash=chmv2obm3h4dyzc57r35izacge)
       '@preact/signals':
         specifier: ^1.3.0
         version: 1.3.0(preact@10.23.1)
@@ -5360,7 +5363,7 @@ snapshots:
     dependencies:
       '@easepick/core': 1.2.1
 
-  '@easepick/bundle@1.2.1':
+  '@easepick/bundle@1.2.1(patch_hash=chmv2obm3h4dyzc57r35izacge)':
     dependencies:
       '@easepick/amp-plugin': 1.2.1
       '@easepick/base-plugin': 1.2.1

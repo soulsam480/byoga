@@ -1,6 +1,5 @@
 /**
  * adapted from @see https://github.com/windwp/kysely-zod-sqlite/blob/main/src/serialize/sqlite-serialize-plugin.ts
- *
  */
 
 import type {
@@ -15,7 +14,7 @@ import type {
   ValueNode,
 } from 'kysely'
 import { OperationNodeTransformer } from 'kysely'
-import { SERIALIZER_REGISTRY } from '../../serializers'
+// import { SERIALIZER_REGISTRY } from '../../serializers'
 import { logger } from '../../../lib/utils/logger'
 
 export function searializeQueryValue(value: unknown): unknown {
@@ -34,6 +33,18 @@ export function searializeQueryValue(value: unknown): unknown {
   return value
 }
 
+function serializeRowDate(row: Record<string, any>) {
+  const DATE_KEYS = new Set(['transaction_at', 'created_at', 'updated_at'])
+
+  DATE_KEYS.forEach((key) => {
+    if (key in row) {
+      row[key] = new Date(row[key])
+    }
+  })
+
+  return row
+}
+
 export class SerializeParametersTransformer extends OperationNodeTransformer {
   public constructor() {
     super()
@@ -49,7 +60,6 @@ export class SerializeParametersTransformer extends OperationNodeTransformer {
   }
 
   // https://www.npmjs.com/package/zodsql
-
   protected transformColumnUpdate(node: ColumnUpdateNode): ColumnUpdateNode {
     const { value: valueNode } = node
 
@@ -104,12 +114,12 @@ export class TypeBoxModelsPlugin implements KyselyPlugin {
   }
 
   private parseResult(rows: any[], table: string) {
-    const tableSerializer = SERIALIZER_REGISTRY[table]
+    // const tableSerializer = SERIALIZER_REGISTRY[table]
 
-    if (tableSerializer === undefined) {
-      logger.warn(`[Model Plugin]: serializer for table ${table} is not present. values will default to SQLite DB types.`)
-      return rows
-    }
+    // if (tableSerializer === undefined) {
+    //   logger.warn(`[Model Plugin]: serializer for table ${table} is not present. values will default to SQLite DB types.`)
+    //   return rows
+    // }
 
     try {
       return rows.map((row) => {
@@ -117,7 +127,8 @@ export class TypeBoxModelsPlugin implements KyselyPlugin {
           return row
         }
 
-        return tableSerializer(row)
+        // return tableSerializer(row)
+        return serializeRowDate(row)
       })
     }
     catch (error) {

@@ -1,4 +1,4 @@
-export const currencyFormat = new Intl.NumberFormat(
+const currencyFormat = new Intl.NumberFormat(
   'en-IN',
   {
     style: 'currency',
@@ -7,3 +7,11 @@ export const currencyFormat = new Intl.NumberFormat(
     notation: 'compact',
   },
 )
+
+export function formatCurrency(value: string | number | bigint | undefined | null) {
+  if (value === null || value === undefined) {
+    return '-'
+  }
+
+  return currencyFormat.format(Number(value))
+}

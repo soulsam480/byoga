@@ -1,4 +1,4 @@
-import { Kysely } from 'kysely'
+import { Kysely, ParseJSONResultsPlugin } from 'kysely'
 import { SQLocalKysely } from 'sqlocal/kysely'
 import type { Database } from './schema'
 import { kyselyLogger } from './lib/logger'
@@ -27,6 +27,13 @@ async function deleteDB() {
 
 const { dialect, sql, destroy } = new SQLocalKysely(databasePath)
 
-const db = new Kysely<Database>({ dialect, log: kyselyLogger, plugins: [new TypeBoxModelsPlugin()] })
+const db = new Kysely<Database>({
+  dialect,
+  log: kyselyLogger,
+  plugins: [
+    new TypeBoxModelsPlugin(),
+    new ParseJSONResultsPlugin(),
+  ],
+})
 
 export { sql, db, destroy, deleteDB }

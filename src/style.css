@@ -70,13 +70,13 @@
 }
 
 .line-animation {
-  stroke-dasharray: 2000;
+  stroke-dasharray: var(--path-length);
   animation: dash 2s ease-in-out forwards;
 }
 
 @keyframes dash {
   from {
-    stroke-dashoffset: 2000;
+    stroke-dashoffset: var(--path-length);
   }
 
   to {
@@ -85,7 +85,7 @@
 }
 
 .bar-animation {
-  stroke-dasharray: 2000;
+  stroke-dasharray: var(--path-length);
   animation: bars 0.5s cubic-bezier(0.42, 0, 0.12, 1) both;
 }
 

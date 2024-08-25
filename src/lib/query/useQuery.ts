@@ -1,5 +1,3 @@
-// TODO: refactor to have stuff like react query
-
 import { signal, useComputed, useSignalEffect } from '@preact/signals'
 
 let fetcherStore: Record<string, () => Promise<unknown>> = {}

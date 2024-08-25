@@ -5,11 +5,12 @@ import type { Signal } from '@preact/signals'
 import { useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import clsx from 'clsx'
 import type { FC } from 'preact/compat'
+import { jsonObjectFrom } from 'kysely/helpers/sqlite'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
 import { useQuery } from '../../query/useQuery'
 import { dateFormat } from '../../utils/date'
-import { currencyFormat } from '../../utils/currency'
+import { formatCurrency } from '../../utils/currency'
 import { colorFromSeed } from '../../utils/color'
 import type { TStaticRanges } from '../RangePicker'
 import { RangePicker, getRangeDisplayValue, withRangeQuery } from '../RangePicker'
@@ -68,11 +69,11 @@ function TransactionRow({ transaction }: ITransactionRowProps) {
       <td>{dateFormat(transaction.transaction_at).mmmddyyyy()}</td>
 
       <td>
-        {transaction.credit !== null ? currencyFormat.format(transaction.credit) : '-'}
+        {formatCurrency(transaction.credit)}
       </td>
 
       <td>
-        {transaction.debit !== null ? currencyFormat.format(transaction.debit) : '-'}
+        {formatCurrency(transaction.debit)}
       </td>
 
       <td>
@@ -89,8 +90,46 @@ function TransactionRow({ transaction }: ITransactionRowProps) {
       </td>
 
       {transaction.balance !== null && (
-        <td>{currencyFormat.format(transaction.balance)}</td>
+        <td>{formatCurrency(transaction.balance)}</td>
       )}
+    </tr>
+  )
+}
+
+interface IAggregateRowProps {
+  total_debit: string | bigint | number | undefined
+  total_credit: string | bigint | number | undefined
+}
+
+function AggregateRow({ total_credit, total_debit }: IAggregateRowProps) {
+  return (
+    <tr class="row">
+      <td colSpan={2} class="text-end">
+        Total
+      </td>
+
+      {
+        total_credit !== undefined && (
+          <td>
+            =
+            {' '}
+            {formatCurrency(total_credit) }
+          </td>
+        )
+      }
+
+      {
+        total_debit !== undefined && (
+          <td>
+            =
+            {' '}
+            {formatCurrency(total_debit) }
+          </td>
+        )
+      }
+
+      <td colSpan={3}></td>
+
     </tr>
   )
 }
@@ -267,13 +306,17 @@ export function TransactionsTable() {
             'transaction_category',
             'transaction_mode',
             'tags',
-            withCategoryQuery(
+            jsonObjectFrom(withCategoryQuery(
               withRangeQuery(eb
                 .selectFrom('transactions'), _range),
               _categories,
             )
-              .select(_eb => [_eb.fn.count('id').as('transactions_count')])
-              .as('transactions_count'),
+              .select(_eb => [
+                _eb.fn.count('id').as('transactions_count'),
+                _eb.fn.sum('debit').as('total_debit'),
+                _eb.fn.sum('credit').as('total_credit'),
+              ]),
+            ).as('aggr'),
           ],
         )
         .orderBy(sql`unixepoch(transaction_at)`, _order)
@@ -284,7 +327,9 @@ export function TransactionsTable() {
     },
   )
 
-  const total = useComputed(() => transactions.value?.[0]?.transactions_count ?? 0)
+  const total = useComputed(() => transactions.value?.[0]?.aggr?.transactions_count ?? 0)
+
+  const aggregateResults = useComputed(() => transactions.value?.[0]?.aggr)
 
   function handlePagination(dir: 'next' | 'prev' | 'reset') {
     return () => {
@@ -344,7 +389,7 @@ export function TransactionsTable() {
 
       </div>
       <div class="overflow-x-auto max-h-96">
-        <table className="table table-zebra table-xs table-pin-rows">
+        <table class="table table-zebra table-xs table-pin-rows">
           {/* head */}
           <thead>
             <tr>
@@ -372,6 +417,14 @@ export function TransactionsTable() {
               transactions.value?.map((it) => {
                 return <TransactionRow transaction={it} key={it.id} />
               })
+            }
+            {
+              (aggregateResults.value?.total_credit || aggregateResults.value?.total_debit) && (
+                <AggregateRow
+                  total_credit={aggregateResults.value.total_credit}
+                  total_debit={aggregateResults.value.total_debit}
+                />
+              )
             }
           </tbody>
         </table>
