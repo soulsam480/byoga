@@ -1,6 +1,6 @@
 import * as R from 'remeda'
 import { useComputed, useSignal } from '@preact/signals'
-import { Chart, type ChartSeriesData, LinearAxis } from '@shelacek/plotery'
+import { Chart, type ChartSeriesData, LinearAxis, Tooltip } from '@shelacek/plotery'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
 import { useQuery } from '../../query/useQuery'
@@ -10,12 +10,16 @@ import { ByogaHorizontalBar } from '../plotery/BarLine'
 import type { TStaticRanges } from '../RangePicker'
 import { RangePicker } from '../RangePicker'
 import { useAnimationComp } from '../../hooks/useAnimationComp'
+import { ByogaToolTip } from '../plotery/ToolTip'
 
 export function SpendModesViz() {
   const range = useSignal<TStaticRanges | [Date, Date]>('last_week')
 
   const { value: modes } = useQuery(
-    () => ['spend_mode_volume', JSON.stringify(range.value)],
+    () => [
+      'spend_mode_volume',
+      range.value,
+    ],
     async () => {
       await startDatabase()
 
@@ -92,6 +96,14 @@ export function SpendModesViz() {
           major
         />
         <ByogaHorizontalBar base="y" />
+
+        <Tooltip>
+          <ByogaToolTip
+            renderText={(data) => {
+              return `${dataSet.value.labels[data[1][1]].toUpperCase()}: ${formatCurrency(data[1][0])}`
+            }}
+          />
+        </Tooltip>
       </Chart>
     </div>
   )

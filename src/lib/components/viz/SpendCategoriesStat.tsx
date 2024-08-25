@@ -1,7 +1,7 @@
 import * as R from 'remeda'
 import { useComputed, useSignal } from '@preact/signals'
 import type { ChartSeriesData } from '@shelacek/plotery'
-import { Chart, LinearAxis } from '@shelacek/plotery'
+import { Chart, LinearAxis, Tooltip } from '@shelacek/plotery'
 import { titleCase } from 'scule'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
@@ -12,12 +12,16 @@ import { ByogaHorizontalBar } from '../plotery/BarLine'
 import type { TStaticRanges } from '../RangePicker'
 import { RangePicker, withRangeQuery } from '../RangePicker'
 import { useAnimationComp } from '../../hooks/useAnimationComp'
+import { ByogaToolTip } from '../plotery/ToolTip'
 
 export function SpendingCatoriesViz() {
   const range = useSignal<TStaticRanges | [Date, Date]>('last_month')
 
   const { value: categories } = useQuery(
-    () => ['spend_category_volume', JSON.stringify(range.value)],
+    () => [
+      'spend_category_volume',
+      range.value,
+    ],
     async () => {
       await startDatabase()
 
@@ -94,6 +98,14 @@ export function SpendingCatoriesViz() {
           major
         />
         <ByogaHorizontalBar base="y" />
+
+        <Tooltip>
+          <ByogaToolTip
+            renderText={(data) => {
+              return `${titleCase(dataSet.value.labels[data[1][1]])}: ${formatCurrency(data[1][0])}`
+            }}
+          />
+        </Tooltip>
       </Chart>
     </div>
   )

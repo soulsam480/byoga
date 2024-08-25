@@ -12,7 +12,7 @@ export function useQueryData<T>(key: string[]) {
   return value
 }
 
-export function useQuery<T>(key: string[] | (() => string[]), fetcher: () => Promise<T>) {
+export function useQuery<T>(key: any[] | (() => any[]), fetcher: () => Promise<T>) {
   const serialized = useComputed(() => {
     if (typeof key === 'function') {
       return JSON.stringify(key())

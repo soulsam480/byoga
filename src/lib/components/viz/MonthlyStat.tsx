@@ -20,7 +20,7 @@ function formatMonthYear(monthStr: string | undefined | null) {
   const date = new Date()
   const [month, year] = monthStr.split('-').map(Number)
 
-  date.setMonth(month)
+  date.setMonth(month === 0 ? 11 : month - 1)
   date.setFullYear(year)
 
   return dateFormat(date).mmmyy()

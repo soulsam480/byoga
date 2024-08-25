@@ -97,8 +97,8 @@ function TransactionRow({ transaction }: ITransactionRowProps) {
 }
 
 interface IAggregateRowProps {
-  total_debit: string | bigint | number | undefined
-  total_credit: string | bigint | number | undefined
+  total_debit: number | undefined
+  total_credit: number | undefined
 }
 
 function AggregateRow({ total_credit, total_debit }: IAggregateRowProps) {
@@ -283,7 +283,13 @@ export function TransactionsTable() {
   })
 
   const { value: transactions } = useQuery(
-    () => ['transactions_list', JSON.stringify(range.value), JSON.stringify(categories.value), order.value, page.value.toString()],
+    () => [
+      'transactions_list',
+      range.value,
+      categories.value,
+      order.value,
+      page.value.toString(),
+    ],
     async () => {
       await startDatabase()
 
@@ -312,9 +318,9 @@ export function TransactionsTable() {
               _categories,
             )
               .select(_eb => [
-                _eb.fn.count('id').as('transactions_count'),
-                _eb.fn.sum('debit').as('total_debit'),
-                _eb.fn.sum('credit').as('total_credit'),
+                _eb.fn.count<number>('id').as('transactions_count'),
+                _eb.fn.sum<number>('debit').as('total_debit'),
+                _eb.fn.sum<number>('credit').as('total_credit'),
               ]),
             ).as('aggr'),
           ],
