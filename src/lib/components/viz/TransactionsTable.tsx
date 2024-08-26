@@ -271,7 +271,7 @@ export function withCategoryQuery<Q extends SelectQueryBuilder<Database, 'transa
 export function TransactionsTable() {
   const page = useSignal(0)
 
-  const range = useSignal<TStaticRanges | [Date, Date]>('last_week')
+  const range = useSignal<TStaticRanges | [Date, Date]>('this_month')
   const categories = useSignal<TransactionModel['transaction_category'][]>([])
   const order = useSignal<TOrderDirection>('desc')
 

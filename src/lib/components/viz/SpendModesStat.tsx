@@ -13,7 +13,7 @@ import { useAnimationComp } from '../../hooks/useAnimationComp'
 import { ByogaToolTip } from '../plotery/ToolTip'
 
 export function SpendModesViz() {
-  const range = useSignal<TStaticRanges | [Date, Date]>('last_week')
+  const range = useSignal<TStaticRanges | [Date, Date]>('this_month')
 
   const { value: modes } = useQuery(
     () => [

@@ -25,13 +25,14 @@ const CURRENT_MONTH_START = getCurrentMonthStart()
 
 export type TRange = TStaticRanges | [Date, Date]
 
-export const STATIC_RANGES = ['last_week', 'last_month', 'last_6_months', 'last_year', 'all_time'] as const
+export const STATIC_RANGES = ['this_month', 'last_month', 'last_6_months', 'last_year', 'all_time'] as const
 
 export type TStaticRanges = IterableElement<typeof STATIC_RANGES>
 
 function getStaticRangeQuery<Q extends SelectQueryBuilder<Database, 'transactions', object>>(qb: Q) {
   return {
     all_time: qb.where(sql`transaction_at`, '<', sql`date('now')`),
+    last_year: qb.where(sql`transaction_at`, '>', sql`date('now','-365 days')`),
     last_6_months: qb.where(eb => eb.and(
       [
         // ideally this should be last month start but SQLite engine is behaving weirdly
@@ -46,8 +47,12 @@ function getStaticRangeQuery<Q extends SelectQueryBuilder<Database, 'transaction
         eb(sql`transaction_at`, '>', sql`date(${CURRENT_MONTH_START.toISOString()},'-30 days')`),
       ],
     )),
-    last_week: qb.where(sql`transaction_at`, '>', sql`date('now','-7 days')`),
-    last_year: qb.where(sql`transaction_at`, '>', sql`date('now','-365 days')`),
+    this_month: qb.where(eb => eb.and(
+      [
+        eb(sql`transaction_at`, '>=', sql`date('now', 'start of month')`),
+        eb(sql`transaction_at`, '<', sql`date('now', 'start of month', '+1 month')`),
+      ],
+    )),
   }
 }
 
