@@ -1,4 +1,5 @@
 import type { BarLineProps, ChartSeriesData } from '@shelacek/plotery'
+import clsx from 'clsx'
 import { Component } from 'preact'
 
 interface ByogaHorizontalBarProps extends BarLineProps {
@@ -35,14 +36,13 @@ export class ByogaHorizontalBar extends Component<ByogaHorizontalBarProps> {
     const scaled = this._scale(points)
     const path = this._calcPath(scaled)
 
-    const cls = [
-      'plot cartesian bar',
-      series,
-      this.props.class || className,
-    ].filter(x => x)
-
     return (
-      <svg className={cls.join(' ')} width={rect?.width} height={rect?.height} {...attrs}>
+      <svg
+        className={clsx('plot cartesian bar', series, this.props.class || className)}
+        width={rect?.width}
+        height={rect?.height}
+        {...attrs}
+      >
         <path className="bars" d={path} />
       </svg>
     )

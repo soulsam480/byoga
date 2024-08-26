@@ -96,8 +96,6 @@ async function main() {
 
   const folderPath = path.join(import.meta.dirname, '../src/db/migrations')
 
-  console.log(folderPath)
-
   ensureDir(folderPath)
 
   const timestamp = Date.now()

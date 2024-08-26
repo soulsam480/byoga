@@ -38,7 +38,13 @@ export function Alerts(): JSX.Element {
       <div class="fixed top-8 z-50 inset-x-0 flex flex-col gap-2 items-center justify-center">
         {alerts.value.map((value) => {
           return (
-            <div role="alert" className={clsx(['alert max-w-96', ALERT_TO_CLASS_MAP[value.type]])}>
+            <div
+              role="alert"
+              className={clsx([
+                'alert max-w-96',
+                ALERT_TO_CLASS_MAP[value.type],
+              ])}
+            >
               {value.message}
             </div>
           )
