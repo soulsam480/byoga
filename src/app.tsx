@@ -1,5 +1,5 @@
-import { Navbar } from './lib/components/Navbar'
 import { Alerts } from './lib/components/Alerts'
+import { Navbar } from './lib/components/Navbar'
 import { AllTimeMonthlyViz } from './lib/components/viz/MonthlyStat'
 import { SpendingCatoriesViz } from './lib/components/viz/SpendCategoriesStat'
 import { SpendModesViz } from './lib/components/viz/SpendModesStat'
@@ -13,11 +13,11 @@ import { TransactionsTable } from './lib/components/viz/TransactionsTable'
 
 export function App() {
   return (
-    <main>
+    <main class="flex h-screen w-screen">
       <Alerts />
       <Navbar />
 
-      <div class="flex flex-col gap-6 p-6">
+      <div class="flex flex-col gap-6 p-6 w-full">
         <div class="grid grid-cols-3 gap-6">
           <div class="col-span-2 flex flex-col gap-6">
             <AllTimeMonthlyViz />

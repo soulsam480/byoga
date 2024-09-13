@@ -1,16 +1,16 @@
-import * as R from 'remeda'
+import type { TransactionModel } from '../../../db/schema'
+import type { TStaticRanges } from '../RangePicker'
 import { useComputed, useSignal } from '@preact/signals'
 import { Chart, type ChartSeriesData, LinearAxis, Tooltip } from '@shelacek/plotery'
+import * as R from 'remeda'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
+import { useAnimationComp } from '../../hooks/useAnimationComp'
 import { useQuery } from '../../query/useQuery'
-import type { TransactionModel } from '../../../db/schema'
 import { formatCurrency } from '../../utils/currency'
 import { ByogaHorizontalBar } from '../plotery/BarLine'
-import type { TStaticRanges } from '../RangePicker'
-import { RangePicker } from '../RangePicker'
-import { useAnimationComp } from '../../hooks/useAnimationComp'
 import { ByogaToolTip } from '../plotery/ToolTip'
+import { RangePicker } from '../RangePicker'
 
 export function SpendModesViz() {
   const range = useSignal<TStaticRanges | [Date, Date]>('this_month')

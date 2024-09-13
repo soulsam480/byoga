@@ -1,6 +1,6 @@
+import type { JSX } from 'preact/compat'
 import { signal } from '@preact/signals'
 import clsx from 'clsx'
-import type { JSX } from 'preact/compat'
 import { createPortal } from 'preact/compat'
 import { tick } from '../utils/tick'
 

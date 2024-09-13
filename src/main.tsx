@@ -1,10 +1,10 @@
-import { registerSW } from 'virtual:pwa-register'
 import { render } from 'preact'
+import { registerSW } from 'virtual:pwa-register'
 import { App } from './app'
-import './style.css'
 import { startDatabase } from './db/lib/migrator'
-import 'unfonts.css'
 import { logger } from './lib/utils/logger'
+import './style.css'
+import 'unfonts.css'
 
 void startDatabase().then(() => {
   logger.info('DB online.')

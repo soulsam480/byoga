@@ -1,6 +1,6 @@
+import type { Database } from './schema'
 import { Kysely, ParseJSONResultsPlugin } from 'kysely'
 import { SQLocalKysely } from 'sqlocal/kysely'
-import type { Database } from './schema'
 import { kyselyLogger } from './lib/logger'
 import { TypeBoxModelsPlugin } from './lib/plugins/models'
 
@@ -36,4 +36,4 @@ const db = new Kysely<Database>({
   ],
 })
 
-export { sql, db, destroy, deleteDB }
+export { db, deleteDB, destroy, sql }

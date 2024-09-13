@@ -1,7 +1,7 @@
 import type { StaticDecode } from '@sinclair/typebox'
+import type { KebabCase } from 'scule'
 import { Type } from '@sinclair/typebox'
 import { TypeCompiler } from '@sinclair/typebox/compiler'
-import type { KebabCase } from 'scule'
 import { kebabCase, snakeCase } from 'scule'
 
 const TransactionModeT = Type.Transform(

@@ -1,17 +1,17 @@
-import { sql } from 'kysely'
-import { useComputed } from '@preact/signals'
 import type { ChartData, ChartSeriesData } from '@shelacek/plotery'
+import { useComputed } from '@preact/signals'
 import { BarLine, CardinalLine, Chart, LinearAxis, Tooltip } from '@shelacek/plotery'
+import CarbonDotMark from '~icons/carbon/dot-mark'
+import { sql } from 'kysely'
 import * as R from 'remeda'
 import { titleCase } from 'scule'
 import { db } from '../../../db/client'
 import { startDatabase } from '../../../db/lib/migrator'
+import { useAnimationComp } from '../../hooks/useAnimationComp'
 import { useQuery } from '../../query/useQuery'
+import { formatCurrency } from '../../utils/currency'
 import { dateFormat } from '../../utils/date'
 import { ByogaToolTip } from '../plotery/ToolTip'
-import { formatCurrency } from '../../utils/currency'
-import { useAnimationComp } from '../../hooks/useAnimationComp'
-import CarbonDotMark from '~icons/carbon/dot-mark'
 
 function formatMonthYear(monthStr: string | undefined | null) {
   if (typeof monthStr !== 'string')
