@@ -38,6 +38,7 @@ export function Highlight({ rect, axes, limits, class: className, children }: IH
       <rect x={x} y={y} width={width} height={height} class={clsx('highlight', className)} />
       {children && (
         <foreignObject x={x} y={y} width={width} height={height}>
+          {/* @ts-expect-error bad types */}
           <body xmlns="http://www.w3.org/1999/xhtml">
             {children}
           </body>
