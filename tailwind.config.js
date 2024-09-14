@@ -1,3 +1,5 @@
+import { tailwindColorFromSeed } from './src/lib/utils/color'
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.tsx'],
@@ -8,6 +10,8 @@ export default {
       },
       colors: {
         brand: 'oklch(var(--brand))',
+        expense: tailwindColorFromSeed('expense'),
+        investment: tailwindColorFromSeed('investment'),
       },
     },
   },

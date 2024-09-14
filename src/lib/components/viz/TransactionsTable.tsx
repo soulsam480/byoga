@@ -394,7 +394,7 @@ export function TransactionsTable() {
         <RangePicker range={range} />
 
       </div>
-      <div class="overflow-x-auto max-h-96">
+      <div class="overflow-x-auto max-h-80">
         <table class="table table-zebra table-xs table-pin-rows">
           {/* head */}
           <thead>

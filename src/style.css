@@ -20,9 +20,37 @@
   --credit: oklch(var(--p));
   --debit: oklch(var(--s));
   --balance: oklch(var(--a));
+  --expense: oklch(0.889 0.396 350.7);
+  --investment: oklch(0.857 0.256 58.7);
 
   --brand: 64.2% 0.139 160.77;
   --brand-color: oklch(var(--brand));
+}
+
+/* force colors irrespective of dataset */
+.plot.debit {
+  stroke: var(--debit) !important;
+  fill: var(--debit) !important;
+}
+
+.plot.credit {
+  stroke: var(--credit) !important;
+  fill: var(--credit) !important;
+}
+
+.plot.balance {
+  stroke: var(--balance) !important;
+  fill: var(--balance) !important;
+}
+
+.plot.investment {
+  stroke: var(--investment) !important;
+  fill: var(--investment) !important;
+}
+
+.plot.expense {
+  stroke: var(--expense) !important;
+  fill: var(--expense) !important;
 }
 
 .alert {
@@ -31,10 +59,12 @@
 
 .monthly-stat-viz {
   --plotery-margin: 0px 0px 16px 32px;
-
+  /*
   --plotery-s1-color: var(--credit);
   --plotery-s2-color: var(--debit);
   --plotery-s3-color: var(--balance);
+  --plotery-s4-color: var(--expense);
+  --plotery-s5-color: var(--investment); */
 }
 
 .spend-categories-viz {
@@ -96,6 +126,10 @@
   to {
     stroke-dashoffset: 0;
   }
+}
+
+.budget-highlight-section {
+  @apply fill-expense/20;
 }
 
 @layer utilities {

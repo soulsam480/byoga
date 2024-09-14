@@ -1,5 +1,6 @@
 import CarbonChartArea from '~icons/carbon/chart-area'
 import CarbonDocumentImport from '~icons/carbon/document-import'
+import CarbonHelpFilled from '~icons/carbon/help-filled'
 import CarbonReset from '~icons/carbon/reset'
 import CarbonSettings from '~icons/carbon/settings'
 import clsx from 'clsx'
@@ -9,6 +10,7 @@ import { useRouter } from '../hooks/useRouter'
 import { invalidateQuery } from '../query/useQuery'
 import { logger } from '../utils/logger'
 import { showAlert } from './Alerts'
+import { HelpModal } from './HelpModal'
 
 async function importFile() {
   const worker = new ComlinkWorker<
@@ -109,20 +111,33 @@ export function Navbar() {
       </div>
 
       <div class="flex flex-col gap-4 items-center mt-auto">
-        <div className="tooltip tooltip-primary tooltip-right" data-tip="Import Statement">
+        <div className="tooltip tooltip-primary tooltip-right" data-tip="Help">
+          <button
+            type="button"
+            class="btn btn-primary btn-sm btn-circle"
+            onClick={() => {
+              document.querySelector<HTMLDialogElement>('#help_modal')?.showModal()
+            }}
+          >
+            <CarbonHelpFilled />
+          </button>
 
+        </div>
+
+        <div className="tooltip tooltip-primary tooltip-right" data-tip="Import Statement">
           <button type="button" class="btn btn-primary btn-sm btn-circle" onClick={importFile}>
             <CarbonDocumentImport />
           </button>
         </div>
 
         <div className="tooltip tooltip-error tooltip-right" data-tip="Reset Database">
-
           <button type="button" class="btn btn-error btn-outline btn-sm btn-circle" onClick={handleDBReset}>
             <CarbonReset />
           </button>
         </div>
       </div>
+
+      <HelpModal />
     </div>
   )
 }

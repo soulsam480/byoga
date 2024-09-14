@@ -24,11 +24,11 @@ function getCurrentMonthStart() {
 
 const CURRENT_MONTH_START = getCurrentMonthStart()
 
-export type TRange = TStaticRanges | [Date, Date]
-
 export const STATIC_RANGES = ['this_month', 'last_month', 'last_6_months', 'last_year', 'all_time'] as const
 
 export type TStaticRanges = IterableElement<typeof STATIC_RANGES>
+
+export type TRange = TStaticRanges | [Date, Date]
 
 function getStaticRangeQuery<Q extends SelectQueryBuilder<Database, 'transactions', object>>(qb: Q) {
   return {
