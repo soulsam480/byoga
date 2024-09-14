@@ -69,7 +69,7 @@ export function SpendingCatoriesViz() {
   useAnimationComp('.spend-category-viz', dataSet)
 
   return (
-    <div className="spend-category-viz border border-base-200 rounded-lg p-4 spend-categories-viz flex flex-col gap-4">
+    <div className="spend-category-viz section spend-categories-viz flex flex-col gap-4">
       <div className="text-sm font-semibold">
         Spend Categories
       </div>

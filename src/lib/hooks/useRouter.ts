@@ -1,6 +1,7 @@
 import { effect, signal, useComputed, useSignalEffect } from '@preact/signals'
 import { useStorage } from './useStorage'
 
+const cachedPage = useStorage<TPage>('__s_page', 'home')
 const urlState = signal(window.location.hash)
 
 effect(() => {
@@ -25,8 +26,6 @@ export type TPage = 'home' | 'settings'
 export const ALLOWED_HASH: TPage[] = ['home', 'settings']
 
 export function useRouter() {
-  const cachedPage = useStorage<TPage>('__s_page', 'home')
-
   // 1. compute the current page
   /**
    * Current page

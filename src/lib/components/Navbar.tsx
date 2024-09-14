@@ -89,31 +89,39 @@ export function Navbar() {
   const router = useRouter()
 
   return (
-    <div class="flex flex-col items-center py-4 bg-base-100 shadow w-14 max-w-14 overflow-x-hidden gap-4">
+    <div class="flex flex-col items-center py-4 bg-base-100 shadow w-14 max-w-14 gap-4">
       <img src="/pwa-192x192.png" height={32} width={32} />
 
-      <h4 class="text-sm -mt-2">Byoga</h4>
+      <h4 class="text-xs font-semibold">Byoga</h4>
 
-      <button type="button" class={clsx('btn btn-sm btn-circle', router.page.value === 'home' ? 'btn-outline btn-accent' : 'btn-ghost')}>
-        <a href="#home">
+      <div class="border-b border-base-300 w-full"></div>
+
+      <div className="tooltip tooltip-accent tooltip-right" data-tip="Home">
+        <a href="#home" type="button" class={clsx('btn btn-sm btn-circle', router.page.value === 'home' ? 'btn-accent btn-active' : 'btn-outline')}>
           <CarbonChartArea />
         </a>
-      </button>
+      </div>
 
-      <button type="button" class={clsx('btn btn-sm btn-circle', router.page.value === 'settings' ? 'btn-outline btn-accent' : 'btn-ghost')}>
-        <a href="#settings">
+      <div className="tooltip tooltip-accent tooltip-right" data-tip="Settings">
+        <a href="#settings" type="button" class={clsx('btn btn-sm btn-circle', router.page.value === 'settings' ? 'btn-accent btn-active' : 'btn-outline')}>
           <CarbonSettings />
         </a>
-      </button>
+      </div>
 
       <div class="flex flex-col gap-4 items-center mt-auto">
-        <button type="button" class="btn btn-primary btn-sm btn-circle" onClick={importFile}>
-          <CarbonDocumentImport />
-        </button>
+        <div className="tooltip tooltip-primary tooltip-right" data-tip="Import Statement">
 
-        <button type="button" class="btn btn-error btn-sm btn-circle" onClick={handleDBReset}>
-          <CarbonReset />
-        </button>
+          <button type="button" class="btn btn-primary btn-sm btn-circle" onClick={importFile}>
+            <CarbonDocumentImport />
+          </button>
+        </div>
+
+        <div className="tooltip tooltip-error tooltip-right" data-tip="Reset Database">
+
+          <button type="button" class="btn btn-error btn-outline btn-sm btn-circle" onClick={handleDBReset}>
+            <CarbonReset />
+          </button>
+        </div>
       </div>
     </div>
   )

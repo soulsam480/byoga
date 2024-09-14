@@ -1,11 +1,11 @@
 import type { Plugin } from 'vite'
-import { defineConfig } from 'vitest/config'
 import preact from '@preact/preset-vite'
-import { comlink } from 'vite-plugin-comlink'
 import Unfonts from 'unplugin-fonts/vite'
+import Icons from 'unplugin-icons/vite'
+import { comlink } from 'vite-plugin-comlink'
 import inspect from 'vite-plugin-inspect'
 import { VitePWA } from 'vite-plugin-pwa'
-import Icons from 'unplugin-icons/vite'
+import { defineConfig } from 'vitest/config'
 
 function SQLiteDevPlugin(): Plugin {
   return {

@@ -1,9 +1,8 @@
 import { Alerts } from './lib/components/Alerts'
 import { Navbar } from './lib/components/Navbar'
-import { AllTimeMonthlyViz } from './lib/components/viz/MonthlyStat'
-import { SpendingCatoriesViz } from './lib/components/viz/SpendCategoriesStat'
-import { SpendModesViz } from './lib/components/viz/SpendModesStat'
-import { TransactionsTable } from './lib/components/viz/TransactionsTable'
+import { useRouter } from './lib/hooks/useRouter'
+import { Home } from './lib/pages/Home'
+import { Settings } from './lib/pages/Settings'
 
 // TODO: next steps for UI ?
 // // 1. file input
@@ -12,24 +11,16 @@ import { TransactionsTable } from './lib/components/viz/TransactionsTable'
 // // 4. chart re-rendering
 
 export function App() {
+  const { page } = useRouter()
+
   return (
     <main class="flex h-screen w-screen">
       <Alerts />
       <Navbar />
 
-      <div class="flex flex-col gap-6 p-6 w-full">
-        <div class="grid grid-cols-3 gap-6">
-          <div class="col-span-2 flex flex-col gap-6">
-            <AllTimeMonthlyViz />
-            <TransactionsTable />
-          </div>
+      {page.value === 'home' && <Home />}
+      {page.value === 'settings' && <Settings />}
 
-          <div className="col-span-1 flex flex-col gap-6">
-            <SpendingCatoriesViz />
-            <SpendModesViz />
-          </div>
-        </div>
-      </div>
     </main>
   )
 }
