@@ -70,11 +70,11 @@ export function SpendingCatoriesViz() {
 
   return (
     <div className="spend-category-viz section spend-categories-viz flex flex-col gap-4">
-      <div className="text-sm font-semibold">
-        Spend Categories
-      </div>
+      <div className="flex justify-between">
+        <div className="text-sm font-semibold">
+          Spend Categories
+        </div>
 
-      <div className="flex justify-end">
         <RangePicker range={range} />
       </div>
 

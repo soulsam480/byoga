@@ -68,11 +68,11 @@ export function SpendModesViz() {
 
   return (
     <div className="spend-modes-viz border border-base-200 rounded-lg p-4 spend-modes-viz flex flex-col gap-4">
-      <div className="text-sm font-semibold">
-        Spend Transaction mediums
-      </div>
+      <div className="flex justify-between">
+        <div className="text-sm font-semibold">
+          Spend Transaction mediums
+        </div>
 
-      <div className="flex justify-end">
         <RangePicker range={range} />
       </div>
 

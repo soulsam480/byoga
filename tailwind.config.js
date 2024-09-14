@@ -6,6 +6,9 @@ export default {
       fontFamily: {
         sans: ['Inter'],
       },
+      colors: {
+        brand: 'oklch(var(--brand))',
+      },
     },
   },
   plugins: [

@@ -240,7 +240,7 @@ function OrderDropdown({ order }: IOrderDropdownProps) {
           {ORDER_TO_LABEL[order.value]}
         </span>
       </div>
-      <ul tabIndex={0} className="dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-32 overflow-y-scroll p-2 shadow">
+      <ul tabIndex={0} className="dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-40 overflow-y-scroll p-2 shadow">
         <li
           onClick={() => { order.value = 'asc' }}
         >

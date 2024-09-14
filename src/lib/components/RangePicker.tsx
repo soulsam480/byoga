@@ -5,6 +5,7 @@ import type { Database } from '../../db/schema'
 import { easepick, RangePlugin } from '@easepick/bundle'
 import easepickStyle from '@easepick/bundle/dist/index.css?url'
 import { useComputed, useSignalEffect } from '@preact/signals'
+import CarbonCalendar from '~icons/carbon/calendar'
 import clsx from 'clsx'
 import { sql } from 'kysely'
 import { useCallback, useEffect, useRef } from 'preact/hooks'
@@ -87,7 +88,7 @@ export function RangePicker({ range }: IRangePickerProps) {
   const datePicker = useRef<HTMLInputElement>(null)
   const picker = useRef<easepick.Core>(null)
 
-  const rangeDisplayValue = useComputed(() => getRangeDisplayValue(range.value))
+  const rangeDisplayValue = useComputed(() => getRangeDisplayValue(range.value, true))
 
   useSignalEffect(() => {
     if (!Array.isArray(range.value)) {
@@ -132,44 +133,68 @@ export function RangePicker({ range }: IRangePickerProps) {
     }
 
     picker.current?.show()
+
+    // @ts-expect-error bad types
+    document.activeElement?.blur()
   }, [range])
 
   return (
-    <div class="max-w-max relative">
-      <div role="tablist" class="tabs tabs-xs tabs-bordered">
-        {
-          STATIC_RANGES.map((value) => {
-            return (
-              <span
-                key={value}
-                role="tab"
-                className={clsx(['tab', range.value === value && 'tab-active font-semibold'])}
-                style="--tab-padding: 8px;"
-                onClick={() => {
-                  range.value = value
-                }}
-              >
-                {titleCase(value)}
-              </span>
-            )
-          })
-        }
-
-        <span
-          role="tab"
-          className={clsx(['tab relative', Array.isArray(range.value) && 'tab-active font-semibold'])}
-          style="--tab-padding: 8px;"
-          onClick={handleCustomClick}
+    <div class="relative">
+      <div className="dropdown dropdown-end">
+        <div
+          tabIndex={0}
+          role="button"
+          className={clsx(
+            'text-xs cursor-pointer flex gap-1 items-center',
+          )}
         >
-          <input
-            className="opacity-0 absolute z-10 inset-0 cursor-pointer"
-            ref={datePicker}
-            readonly
-          />
-          {rangeDisplayValue}
-        </span>
+          <CarbonCalendar />
+          <span>
+            {rangeDisplayValue}
+          </span>
+        </div>
+
+        <ul tabIndex={0} className="dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-52 p-2 shadow">
+          {
+            STATIC_RANGES.map((value) => {
+              return (
+                <li
+                  key={value}
+                  onClick={() => {
+                    range.value = value
+
+                    // @ts-expect-error bad types
+                    document.activeElement?.blur()
+                  }}
+                >
+                  <span
+                    class={clsx(range.value === value && 'active')}
+                  >
+                    {titleCase(value)}
+                  </span>
+                </li>
+              )
+            })
+          }
+
+          <li
+            onClick={handleCustomClick}
+          >
+            <span
+              class={clsx(Array.isArray(range.value) && 'active')}
+            >
+              Custom
+            </span>
+          </li>
+        </ul>
       </div>
 
+      <input
+        className="opacity-0 absolute z-10 inset-0 cursor-pointer invisible"
+        ref={datePicker}
+        readonly
+        tabIndex={-1}
+      />
     </div>
   )
 }

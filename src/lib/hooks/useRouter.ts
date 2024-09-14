@@ -1,7 +1,7 @@
 import { effect, signal, useComputed, useSignalEffect } from '@preact/signals'
 import { useStorage } from './useStorage'
 
-const cachedPage = useStorage<TPage>('__s_page', 'home')
+const cachedPage = useStorage<TPage>('current_page', 'home')
 const urlState = signal(window.location.hash)
 
 effect(() => {

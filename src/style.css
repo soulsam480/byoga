@@ -20,6 +20,9 @@
   --credit: oklch(var(--p));
   --debit: oklch(var(--s));
   --balance: oklch(var(--a));
+
+  --brand: 64.2% 0.139 160.77;
+  --brand-color: oklch(var(--brand));
 }
 
 .alert {
@@ -102,5 +105,13 @@
 
   .section {
     @apply border border-base-200 rounded-lg p-4;
+  }
+}
+
+@layer base {
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 }
