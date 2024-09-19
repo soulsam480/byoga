@@ -1,5 +1,6 @@
 import type { ChartAttributes, ChartData } from '@shelacek/plotery'
-import { Fragment } from 'preact'
+import CarbonDotMark from '~icons/carbon/dot-mark'
+import { Fragment } from 'preact/jsx-runtime'
 
 interface ITooltipProps extends Partial<ChartAttributes> {
   position?: [number, number]
@@ -28,32 +29,6 @@ function getPoints(position: number, data: ChartData) {
   }, {})
 }
 
-const SPACING_X_OUT = 20
-const SPACING_Y_OUT = 25
-const SPACING_BETWEEN = 20
-
-function getDataLabelDimensions(position: [number, number], dataPoints: string[]) {
-  const dataPointPositions: Array<[number, number]> = []
-
-  const maxWidth = dataPoints.map(it => it.toString().length * 5).sort()[0]
-
-  for (let i = 0; i <= dataPoints.length; i++) {
-    dataPointPositions.push([
-      position[0] + SPACING_X_OUT,
-      (i !== 0 ? dataPointPositions[i - 1][1] + SPACING_BETWEEN : position[1] + SPACING_Y_OUT),
-    ])
-  }
-
-  const height = dataPointPositions[dataPointPositions.length - 1][1] - dataPointPositions[0][1] + SPACING_Y_OUT
-
-  const boxDimensions: [number, number] = [maxWidth + (SPACING_X_OUT * 2.5), height]
-
-  return {
-    dataPointPositions,
-    boxDimensions,
-  }
-}
-
 export function ByogaToolTip({
   axes,
   data,
@@ -61,8 +36,9 @@ export function ByogaToolTip({
   rect,
   series = 'debit',
   renderText = ([_, point]) => point[1].toFixed(2),
+  host,
 }: ITooltipProps) {
-  if (!data || !axes || !position || !rect) {
+  if (!data || !axes || !position || !rect || !host) {
     return null
   }
 
@@ -75,10 +51,8 @@ export function ByogaToolTip({
 
   const textToRender = seriesValues.map(renderText)
 
-  const labelDimensions = getDataLabelDimensions(position, textToRender)
-
   return (
-    <g>
+    <>
       <path d={`M${position[0]},0V${rect.height}`} stroke-width="1px" stroke="grey" stroke-dasharray="4" />
       {
         seriesValues.map(([series, point], index) => {
@@ -97,26 +71,28 @@ export function ByogaToolTip({
         })
       }
 
-      <rect
+      <foreignObject
         x={position[0]}
         y={position[1]}
-        width={labelDimensions.boxDimensions[0]}
-        height={labelDimensions.boxDimensions[1]}
-        fill="white"
-        stroke-width="1.5"
-        class="stroke-base-300"
-        rx="8"
-      />
-      {
-        textToRender.map((it, index) => {
-          const seriesName = seriesValues[index][0]
-          const textPos = labelDimensions.dataPointPositions[index]
+        width="100%"
+        height="100%"
+        class="overflow-visible"
+      >
+        <ul class="flex flex-col gap-1 items-start bg-white rounded shadow p-2 max-w-max">
+          {
+            textToRender.map((el, index) => {
+              const seriesName = seriesValues[index][0]
 
-          return (
-            <text x={textPos[0]} y={textPos[1]} fill={`var(--${seriesName})`}>{it}</text>
-          )
-        })
-      }
-    </g>
+              return (
+                <li class="text-[10px] inline-flex gap-1">
+                  <CarbonDotMark style={{ color: `var(--${seriesName})` }} />
+                  {el}
+                </li>
+              )
+            })
+          }
+        </ul>
+      </foreignObject>
+    </>
   )
 }

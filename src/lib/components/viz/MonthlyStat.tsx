@@ -146,6 +146,8 @@ export function AllTimeMonthlyViz() {
 
         <Highlight class="budget-highlight-section" limits={{ y1: 0, y2: monthlyBudget.value }} />
 
+        <Highlight class="investment-highlight-section" limits={{ y1: 0, y2: monthlyInvestment.value }} />
+
         <BarLine series="credit" />
         <BarLine series="debit" />
 

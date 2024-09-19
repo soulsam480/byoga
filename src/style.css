@@ -79,6 +79,10 @@
   --plotery-s1-color: var(--debit);
 }
 
+.plotery {
+  @apply relative;
+}
+
 .plotery .labels text,
 .plotery .tooltip text {
   @apply transition-colors ease-in-out duration-200;
@@ -130,6 +134,10 @@
 
 .budget-highlight-section {
   @apply fill-expense/20;
+}
+
+.investment-highlight-section {
+  @apply fill-investment/20;
 }
 
 @layer utilities {
