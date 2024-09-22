@@ -1,22 +1,62 @@
 import * as R from 'remeda'
-import type { TTransactionMode } from '../transformers/transaction_mode'
-import type { TTransactionInput } from '../transformers/transaction'
+import { snakeCase } from 'scule'
+import type { TransactionInsert, TransactionModel } from '../../../db/schema'
+import type { IRawTransactionRow } from '../FileReader'
+import { FileReader } from '../FileReader'
+import { Processor } from '../Parser'
+import { Transformer } from '../Transformer'
 import { dateFormat } from '../../../lib/utils/date'
-import { logger } from '../../../lib/utils/logger'
-import { TransactionModeC } from '../transformers/transaction_mode'
-import type { TTransactionCategory } from './types'
+import {
+  AUTOPAY_RE,
+  BIKE_RE,
+  CASH_TRANSFER_RE,
+  DEPOSIT_RE,
+  DOMESTIC_SPEND_RE,
+  ENTERTAINMENT_RE,
+  FOOD_RE,
+  GROCERY_RE,
+  MEDICAL_RE,
+  MERCHANT_PAYMENT_RE,
+  NACH_RE,
+  ONLINE_SHOPPING_RE,
+  PERSONAL_RE,
+  PETROL_RE,
+  TRANSPORT_RE,
+} from '../regexp'
+
+class IDFCFileReader extends FileReader {
+  makeParsableCSV(values: string) {
+    // 1. remove head meta
+    values = `Transaction${values.split('\nTransaction')[1]}`
+
+    // 2. remove tail meta
+    return values.split('\n,Total')[0]
+  }
+
+  transformHeader(header: string): keyof IRawTransactionRow {
+    return IDFCFileReader.UNKNOWN_TO_KNOWN_HEADER_MAP[header] ?? header
+  }
+
+  static UNKNOWN_TO_KNOWN_HEADER_MAP: Record<string, keyof IRawTransactionRow> = {
+    'Transaction Date': 'transaction_date',
+    'Particulars': 'meta',
+    'Debit': 'debit',
+    'Credit': 'credit',
+    'Balance': 'balance',
+  }
+}
 
 // ? === PUBLIC API ===
 
-export interface IMetaResult {
-  transaction_mode: TTransactionMode
+interface IMetaResult {
+  transaction_mode: TransactionModel['transaction_mode']
   transaction_ref: string | null
-  transaction_category: TTransactionCategory
+  transaction_category: TransactionModel['transaction_category']
   tags: string[]
   additional_meta: Record<string, string | null>
 }
 
-export function parseMeta(transaction: TTransactionInput): IMetaResult {
+export function parseMeta(transaction: IRawTransactionRow): IMetaResult {
   const result: IMetaResult = R.pipe(
     transaction,
     // 1. create base shape
@@ -67,12 +107,12 @@ export function parseMeta(transaction: TTransactionInput): IMetaResult {
  * @private
  */
 export interface IntermediateMetaResult {
-  transaction_mode: TTransactionMode
+  transaction_mode: TransactionModel['transaction_mode']
   transaction_ref: string | null
-  transaction: TTransactionInput
+  transaction: IRawTransactionRow
   parts: string[]
   tags: Set<string>
-  categories: Set<TTransactionCategory>
+  categories: Set<TransactionModel['transaction_category']>
   additional: Record<string, string | null>
 }
 
@@ -85,7 +125,7 @@ function hasLength(length: number) {
   }
 }
 
-function isTransactionMode(mode: TTransactionMode) {
+function isTransactionMode(mode: TransactionModel['transaction_mode']) {
   return (ctx: IntermediateMetaResult) => {
     return ctx.transaction_mode === mode
   }
@@ -106,12 +146,12 @@ function isFormattedUPITransaction() {
 // parsers check and transform data inside a condition
 
 function createBaseResult(
-  transaction: TTransactionInput,
+  transaction: IRawTransactionRow,
 ): IntermediateMetaResult {
   return {
     transaction,
     transaction_mode: 'unknown',
-    parts: transaction.Particulars.split('/'),
+    parts: transaction.meta.split('/'),
     transaction_ref: null,
     categories: new Set(),
     tags: new Set(),
@@ -130,7 +170,7 @@ function createMonthlyInterestRef(date: string) {
 function parseSingleMeta(
   result: IntermediateMetaResult,
 ): IntermediateMetaResult {
-  if (result.transaction.Particulars === 'MONTHLY SAVINGS INTEREST CREDIT') {
+  if (result.transaction.meta === 'MONTHLY SAVINGS INTEREST CREDIT') {
     result.categories.add('bank_transfer')
     result.tags.add('MONTHLY SAVINGS INTEREST')
 
@@ -138,7 +178,7 @@ function parseSingleMeta(
       ...result,
       transaction_mode: 'monthly_interest',
       transaction_ref: createMonthlyInterestRef(
-        result.transaction['Transaction Date'],
+        result.transaction.transaction_date,
       ),
     }
   }
@@ -156,19 +196,15 @@ function parseSingleMeta(
 function parseTransactionMode(
   result: IntermediateMetaResult,
 ): IntermediateMetaResult {
-  try {
-    return {
-      ...result,
-      transaction_mode: TransactionModeC.Decode(result.parts[0]),
-    }
-  }
-  catch (error) {
-    logger.warn('Error while parsing transaction mode for', result, error)
+  let mode = IDFCTransformer.UNKNOWN_TO_KNOWN_TRANSACTION_MODE_MAP[result.parts[0]] ?? snakeCase(result.parts[0])
 
-    return {
-      ...result,
-      transaction_mode: 'unknown',
-    }
+  if (mode.length === 0) {
+    mode = 'unknown'
+  }
+
+  return {
+    ...result,
+    transaction_mode: mode,
   }
 }
 
@@ -193,7 +229,7 @@ function parseTransactionRef(
       return {
         ...result,
         transaction_ref: createMonthlyInterestRef(
-          result.transaction['Transaction Date'],
+          result.transaction.transaction_date,
         ),
       }
 
@@ -206,7 +242,7 @@ function parseTransactionRef(
   }
 }
 
-function execRegexp(regexp: RegExp, category: TTransactionCategory) {
+function execRegexp(regexp: RegExp, category: TransactionModel['transaction_category']) {
   return (ctx: IntermediateMetaResult) => {
     let match: string | null = null
     // handle regexp match based on mode
@@ -215,7 +251,7 @@ function execRegexp(regexp: RegExp, category: TTransactionCategory) {
         {
           // attempt to capture location for atm
           const { location = null }
-            = ctx.transaction.Particulars.match(regexp)?.groups ?? {}
+            = ctx.transaction.meta.match(regexp)?.groups ?? {}
 
           ctx.categories.add(category)
           ctx.tags.add('CASH WITHDRAWAL')
@@ -232,14 +268,14 @@ function execRegexp(regexp: RegExp, category: TTransactionCategory) {
       // neft and nach need the entire string
       case 'neft':
       case 'nach':
-        match = ctx.transaction.Particulars.match(regexp)?.groups?.tag ?? null
+        match = ctx.transaction.meta.match(regexp)?.groups?.tag ?? null
 
         break
 
       // imps needs to extract recipient
       case 'imps': {
         const { tag = 'transfer', recipient }
-          = ctx.transaction.Particulars.match(regexp)?.groups ?? {}
+          = ctx.transaction.meta.match(regexp)?.groups ?? {}
 
         ctx.categories.add(category)
         ctx.tags.add(tag)
@@ -255,7 +291,7 @@ function execRegexp(regexp: RegExp, category: TTransactionCategory) {
 
         // 1. if meta starts with category, we can directly take everything after whitespace
         if (tag_cat) {
-          match = ctx.transaction.Particulars.split(' ').slice(1).join(' ').trim()
+          match = ctx.transaction.meta.split(' ').slice(1).join(' ').trim()
         }
         // 2. else treat capture as tag
         else {
@@ -285,42 +321,6 @@ function execRegexp(regexp: RegExp, category: TTransactionCategory) {
 
 type RegexpGenerator = (ctx: IntermediateMetaResult) => RegExp
 
-// ? === UPI spend ===
-const FOOD_RE = /^food\s(?<tag_cat>\w+)|(?<tag>food|fod|fpod|foos|dood|fruit|coffe|lunch|dinner|juice|sweets|curd|chicken|mutton|milk|egg|coke|coconut|choco[a-z]+|iron\shill|swiggy|zomato)/i
-
-const BIKE_RE = /^bike\s(?<tag_cat>\w+)|(?<tag>bike|motorcycle|suzuki|parking|balaklava)/i
-
-const DOMESTIC_SPEND_RE
-  = /^house\s(?<tag_cat>\w+)|(?<tag>house|rent|water|warer|service|fiber|cutlery|DTH|airtel|jio|recharge|station[ae]ry|filter|puja|murthy)/i
-
-const DEPOSIT_RE = /(?<tag>RD|SBI|[Dd]eposit|Zerodha|SIP|LIC|Lic|lic)/
-
-const ONLINE_SHOPPING_RE = /(?<tag>amazon|flipkart|online|order)/i
-
-const PETROL_RE = /(?<tag>petrol|fuel|pretol)/i
-
-const GROCERY_RE = /^grocery\s(?<tag_cat>\w+)|(?<tag>grocery|vegetable|bag|polythene)/i
-
-const TRANSPORT_RE
-  = /(?<tag>transport|taxi|bus|fare|cab|uber|rapido|cleartrip)/i
-
-const MEDICAL_RE = /^medical\s(?<tag_cat>\w+)|(?<tag>medicine|medical|health|check up)/i
-
-const ENTERTAINMENT_RE = /(?<tag>film|haikyuu)/i
-
-const MERCHANT_PAYMENT_RE
-  = /(?<tag>merchant|UPIIntent|PhonePe|Razorpay|BharatPe|FEDERAL\sEASYPAYMENTS|[Oo]nline|[Pp]ayment|[Tt]ransaction|UPI|[Cc]collect|request|[Pp]ay\s[Tt]o|DYNAMICQR|YESB)/
-
-const AUTOPAY_RE = /(?<tag>autopay|mandate)/i
-
-const PERSONAL_RE = /(?:(?:personal|shopping)\s(?<tag_cat>\w+))?(?<tag>clothes|decathlon|slipper|clothing|shopping|allowance|stuff)/i
-
-const CASH_TRANSFER_RE = /^transfer\s(?<tag_cat>\w+)|(?<tag>atm\scash|cash|transfer|refund|lend)/i
-
-// ? === Auto payment ===
-
-const NACH_RE = /(?<tag>indian\sclearing\scorp)/i
-
 // ? === ATM ===
 const ATM_RE: RegexpGenerator = ctx =>
   new RegExp(
@@ -339,107 +339,6 @@ const IMPS_RE: RegexpGenerator = ctx =>
     `${ctx.transaction_ref ?? ''}\/(?<recipient>[\\w\\s-]+)\/.*\/(?<tag>[\\w\\s-]+)$`,
     'i',
   )
-
-/**
- * // TODO: Next plans for parsing
- * // - impl a formatted string setup
- * // - i.e. when meta is entered in certain format, it'll be easier to parse
- * // - something like f:category-tag-place-recipient etc.
- */
-
-const STRING_CHUNK_RE = /.{2}/g
-const EXPRESSION_RE = /^[iplre]/i
-
-type TExpression = 'i' | 'p' | 'l' | 'r' | 'e'
-
-interface IFormattedMeta {
-  category: TTransactionCategory
-  party?: string
-  location?: string
-  description?: string
-  event?: string
-}
-
-const EXPRESSION_TO_PROPERTY_MAP: Record<TExpression, keyof IFormattedMeta> = {
-  e: 'event',
-  i: 'category',
-  l: 'location',
-  p: 'party',
-  r: 'description',
-}
-
-function parseFormattedTransaction() {
-  return (ctx: IntermediateMetaResult) => {
-    const formattedTransaction = ctx.parts.at(-1)
-
-    if (formattedTransaction === undefined)
-      return ctx
-
-    const chunks = Array.from(
-      formattedTransaction.match(STRING_CHUNK_RE) ?? [],
-    )
-
-    const indices: number[][] = []
-
-    for (let i = 0; i < chunks.length; i++) {
-      const item = chunks[i]
-
-      const last = indices[indices.length - 1]
-
-      // 1. current is an expression
-      // 2. current is only an expression
-      // 3. current ends with whitespace
-      // 4. next starts with whitespace
-      // ? last two rules are significant as they assert we only take expressions as anchors
-      const match
-        = EXPRESSION_RE.test(item.trim())
-        && item.trim().length === 1
-        && (item.endsWith(' ') || chunks[i + 1]?.startsWith(' '))
-
-      if (!match)
-        continue
-
-      const res = i * 2
-
-      if (last !== undefined) {
-        indices[indices.length - 1] = [
-          ...last,
-          item.endsWith(' ') ? res - 1 : res,
-        ]
-      }
-
-      indices.push([item.startsWith(' ') ? res + 1 : res])
-    }
-
-    const { category, ...rest }: IFormattedMeta
-      = indices.reduce<IFormattedMeta>(
-        (acc, curr) => {
-          const chunk = formattedTransaction.slice(curr[0], curr[1])
-
-          const [expr, ...value] = chunk.split(' ')
-
-          return {
-            ...acc,
-            [EXPRESSION_TO_PROPERTY_MAP[expr.toLowerCase() as TExpression]]:
-              value.join(' '),
-          }
-        },
-        {
-          category: 'unknown',
-        },
-      )
-
-    ctx.categories.add(category)
-    Object.keys(rest).forEach(it => ctx.tags.add(it))
-
-    ctx.additional = {
-      ...ctx.additional,
-      ...rest,
-    }
-
-    return ctx
-  }
-}
 
 /**
  * @private
@@ -488,4 +387,34 @@ export function parseAdditionalMeta(ctx: IntermediateMetaResult) {
   }
 
   return result
+}
+
+class IDFCTransformer extends Transformer {
+  static UNKNOWN_TO_KNOWN_TRANSACTION_MODE_MAP: Record<string, TransactionModel['transaction_mode']> = {
+    'MONTHLY SAVINGS INTEREST CREDIT': 'monthly_interest',
+    'UPI-REV': 'upi',
+    'IMPS-INET': 'imps',
+    'IMPS-MOB': 'imps',
+    'IMPS-OPM': 'imps',
+    'IMPS-RIB': 'imps',
+    'ATM-NFS': 'atm',
+  }
+}
+
+export class IDFCParser extends Processor {
+  get reader() {
+    return new IDFCFileReader('Account Statement')
+  }
+
+  get transformer() {
+    return new IDFCTransformer()
+  }
+
+  async process(file: File): Promise<TransactionInsert[]> {
+    const csvRows = await this.reader.parse(file)
+
+    return this.transformer.transform(
+      csvRows,
+    )
+  }
 }
