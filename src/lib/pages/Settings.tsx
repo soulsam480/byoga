@@ -1,7 +1,7 @@
 import type { ComponentType, JSX } from 'preact'
+import { useStorage } from '../hooks/useStorage'
 import CarbonBox from '~icons/carbon/box'
 import CarbonRocket from '~icons/carbon/rocket'
-import { useStorage } from '../hooks/useStorage'
 
 export const monthlyBudget = useStorage('monthly_budget', 0)
 export const monthlyInvestment = useStorage('monthly_investment', 0)

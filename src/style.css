@@ -1,5 +1,5 @@
 /* eslint-disable-next-line */
-@import "@shelacek/plotery/dist/css/plotery.css";
+@import '@shelacek/plotery/dist/css/plotery.css';
 
 @tailwind base;
 @tailwind components;
@@ -151,8 +151,8 @@
 }
 
 @layer base {
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }

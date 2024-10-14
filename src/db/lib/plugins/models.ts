@@ -34,7 +34,9 @@ export function searializeQueryValue(value: unknown): unknown {
 }
 
 function serializeRowDate(row: Record<string, any>) {
-  const DATE_KEYS = new Set(['transaction_at', 'created_at', 'updated_at'])
+  const DATE_KEYS = new Set(['transaction_at', 'created_at', 'updated_at', 'start_at', 'end_at'])
+
+  // console.log('LOG C', row)
 
   DATE_KEYS.forEach((key) => {
     if (key in row) {
@@ -100,7 +102,7 @@ export class TypeBoxModelsPlugin implements KyselyPlugin {
   public transformQuery(args: PluginTransformQueryArgs): RootOperationNode {
     const { node, queryId } = args
 
-    if (node.kind === 'SelectQueryNode' && !node.joins) {
+    if (node.kind === 'SelectQueryNode') {
       const table = (node as any).from?.froms[0]?.table.identifier?.name
 
       if (table) {

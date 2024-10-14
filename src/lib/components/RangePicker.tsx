@@ -1,16 +1,15 @@
 import type { Signal } from '@preact/signals'
 import type { SelectQueryBuilder } from 'kysely'
-import type { IterableElement } from 'type-fest'
-import type { Database } from '../../db/schema'
-import { easepick, RangePlugin } from '@easepick/bundle'
+import type { IterableElement, UnknownRecord } from 'type-fest'
+import { RangePlugin, easepick } from '@easepick/bundle'
 import easepickStyle from '@easepick/bundle/dist/index.css?url'
 import { useComputed, useSignalEffect } from '@preact/signals'
-import CarbonCalendar from '~icons/carbon/calendar'
 import clsx from 'clsx'
 import { sql } from 'kysely'
 import { useCallback, useEffect, useRef } from 'preact/hooks'
 import { titleCase } from 'scule'
 import { dateFormat } from '../utils/date'
+import CarbonCalendar from '~icons/carbon/calendar'
 import './rangepicker.css'
 
 function getCurrentMonthStart() {
@@ -30,7 +29,7 @@ export type TStaticRanges = IterableElement<typeof STATIC_RANGES>
 
 export type TRange = TStaticRanges | [Date, Date]
 
-function getStaticRangeQuery<Q extends SelectQueryBuilder<Database, 'transactions', object>>(qb: Q) {
+function getStaticRangeQuery<Q extends SelectQueryBuilder<UnknownRecord, any, object>>(qb: Q) {
   return {
     all_time: qb.where(sql`transaction_at`, '<', sql`date('now')`),
     last_year: qb.where(sql`transaction_at`, '>', sql`date('now','-365 days')`),
@@ -57,15 +56,15 @@ function getStaticRangeQuery<Q extends SelectQueryBuilder<Database, 'transaction
   }
 }
 
-export function withRangeQuery<Q extends SelectQueryBuilder<Database, 'transactions', object>>(qb: Q, range: TRange) {
+export function withRangeQuery<Q extends SelectQueryBuilder<UnknownRecord, any, object>>(qb: Q, range: TRange): Q {
   if (typeof range === 'string') {
-    return getStaticRangeQuery(qb)[range]
+    return getStaticRangeQuery(qb)[range] as Q
   }
 
   return qb.where(eb => eb.and([
     eb(sql`transaction_at`, '>', sql`date(${range[0].toISOString()})`),
     eb(sql`transaction_at`, '<', sql`date(${range[1].toISOString()})`),
-  ]))
+  ])) as Q
 }
 
 export function getRangeDisplayValue(range: TRange, showStatic = false) {

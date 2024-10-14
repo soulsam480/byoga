@@ -1,30 +1,34 @@
 import type { Signal } from '@preact/signals'
 import type { SelectQueryBuilder } from 'kysely'
 import type { FC } from 'preact/compat'
-import type { Database, TransactionModel } from '../../../db/schema'
-import type { TStaticRanges } from '../RangePicker'
 import { useComputed, useSignal, useSignalEffect } from '@preact/signals'
-import CarbonArrowDownLeft from '~icons/carbon/arrow-down-left'
-import CarbonArrowUpRight from '~icons/carbon/arrow-up-right'
-import CarbonCheckmarkFilled from '~icons/carbon/checkmark-filled'
-import CarbonCloseFilled from '~icons/carbon/close-filled'
-import CarbonDotMark from '~icons/carbon/dot-mark'
-import CarbonSortAscending from '~icons/carbon/sort-ascending'
-import CarbonSortDescending from '~icons/carbon/sort-descending'
-import CarbonTriangleLeftSolid from '~icons/carbon/triangle-left-solid'
-import CarbonTriangleRightSolid from '~icons/carbon/triangle-right-solid'
 import clsx from 'clsx'
 import { sql } from 'kysely'
 import { jsonObjectFrom } from 'kysely/helpers/sqlite'
 import { titleCase } from 'scule'
+import type { UnknownRecord } from 'type-fest'
+import type { TStaticRanges } from '../RangePicker'
+import type { TransactionModel } from '../../../db/schema'
 import { db } from '../../../db/client'
 import { TRANSACTION_CATEGORIES } from '../../../db/lib/constants/categories'
 import { startDatabase } from '../../../db/lib/migrator'
-import { useQuery } from '../../query/useQuery'
+import { invalidateRelatedQuery, useQuery } from '../../query/useQuery'
 import { colorFromSeed } from '../../utils/color'
 import { formatCurrency } from '../../utils/currency'
 import { dateFormat } from '../../utils/date'
-import { getRangeDisplayValue, RangePicker, withRangeQuery } from '../RangePicker'
+import { RangePicker, getRangeDisplayValue, withRangeQuery } from '../RangePicker'
+import { createEvent, useEvents } from '../../query/events'
+import { addEventToTransactions } from '../../query/transactions'
+import { useTableSelection } from '../../hooks/useTableSelection'
+import CarbonTriangleRightSolid from '~icons/carbon/triangle-right-solid'
+import CarbonTriangleLeftSolid from '~icons/carbon/triangle-left-solid'
+import CarbonSortDescending from '~icons/carbon/sort-descending'
+import CarbonSortAscending from '~icons/carbon/sort-ascending'
+import CarbonDotMark from '~icons/carbon/dot-mark'
+import CarbonCloseFilled from '~icons/carbon/close-filled'
+import CarbonCheckmarkFilled from '~icons/carbon/checkmark-filled'
+import CarbonArrowUpRight from '~icons/carbon/arrow-up-right'
+import CarbonArrowDownLeft from '~icons/carbon/arrow-down-left'
 
 interface ITransactionRowProps {
   transaction: Pick<TransactionModel, 'id'
@@ -34,7 +38,9 @@ interface ITransactionRowProps {
   | 'balance'
   | 'transaction_category'
   | 'transaction_mode'
-  | 'tags' >
+  | 'tags' > & { event_name: string | null }
+  onSelect: () => void
+  isSelected: boolean
 }
 
 interface ITransactionCategoryProps {
@@ -56,9 +62,18 @@ function TransactionCategory({ category, checked }: ITransactionCategoryProps) {
   )
 }
 
-function TransactionRow({ transaction }: ITransactionRowProps) {
+function TransactionRow({ transaction, isSelected, onSelect }: ITransactionRowProps) {
   return (
     <tr class="row">
+      <td>
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={onSelect}
+          className="checkbox checkbox-xs"
+        />
+      </td>
+
       <td class="inline-flex gap-1">
         {transaction.credit === null
           ? <CarbonArrowUpRight class="stroke-2 text-secondary" />
@@ -86,6 +101,10 @@ function TransactionRow({ transaction }: ITransactionRowProps) {
       </td>
 
       <td>
+        {transaction.event_name ?? '-'}
+      </td>
+
+      <td>
         {titleCase(transaction.transaction_mode).toUpperCase()}
       </td>
 
@@ -104,7 +123,7 @@ interface IAggregateRowProps {
 function AggregateRow({ total_credit, total_debit }: IAggregateRowProps) {
   return (
     <tr class="row">
-      <td colSpan={2} class="text-end">
+      <td colSpan={3} class="text-end">
         Total
       </td>
 
@@ -260,12 +279,86 @@ function OrderDropdown({ order }: IOrderDropdownProps) {
   )
 }
 
-export function withCategoryQuery<Q extends SelectQueryBuilder<Database, 'transactions', object>>(qb: Q, categories: TransactionModel['transaction_category'][]) {
+interface ISelectionActionsRowProps {
+  selectionState: Signal<Set<number>>
+  resetSelection: () => void
+}
+
+function SelectionActionsRow({ selectionState, resetSelection }: ISelectionActionsRowProps) {
+  const { events } = useEvents()
+
+  async function handleAddEventToTransactions(eventId: number) {
+    await addEventToTransactions(Array.from(selectionState.value), eventId)
+
+    await invalidateRelatedQuery('transactions')
+
+    resetSelection()
+  }
+
+  async function handleEventCreationAndLink(event: SubmitEvent) {
+    event.preventDefault()
+    event.stopImmediatePropagation()
+
+    const formData = Object
+      .fromEntries(new FormData(event.target as HTMLFormElement)
+        .entries()) as Record<'name', string>
+
+    const newEvent = await createEvent(formData)
+
+    await handleAddEventToTransactions(newEvent.id)
+  }
+
+  return (
+    <div className="flex items-center px-4 gap-2 relative">
+      <span class="text-xs">
+        <span class="font-semibold">{selectionState.value.size}</span>
+        {' '}
+        Selected
+      </span>
+
+      <div className="dropdown dropdown-bottom">
+        <button tabIndex={0} role="button" className="btn btn-xs">Add to event</button>
+        <ul tabIndex={0} className="dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-52 p-2 shadow h-52 overflow-y-scroll">
+          {
+            events.value?.map((event) => {
+              return (
+                <li key={event.id} onClick={() => { handleAddEventToTransactions(event.id) }}><span>{event.name}</span></li>
+              )
+            })
+          }
+        </ul>
+      </div>
+
+      <div className="dropdown dropdown-bottom">
+        <button className="btn btn-xs">Create new</button>
+        <div tabIndex={0} className="dropdown-content bg-base-100 rounded-box z-10 w-52 p-2 shadow">
+          <form onSubmit={handleEventCreationAndLink} class="flex flex-col gap-2">
+            <input
+              type="text"
+              name="name"
+              placeholder="Event name"
+              className="input input-bordered input-sm w-full max-w-xs"
+            />
+
+            <div className="flex justify-end">
+              <button type="submit" className="btn btn-xs">Add Event</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function withCategoryQuery<Q extends SelectQueryBuilder<UnknownRecord, any, object>>(
+  qb: Q,
+  categories: TransactionModel['transaction_category'][],
+): Q {
   if (categories.length === 0) {
     return qb
   }
 
-  return qb.where('transaction_category', 'in', categories)
+  return qb.where(sql`transaction_category`, 'in', categories) as Q
 }
 
 export function TransactionsTable() {
@@ -302,34 +395,40 @@ export function TransactionsTable() {
         withRangeQuery(db.selectFrom('transactions'), _range),
         _categories,
       )
+        .leftJoin('events as e', 'e.id', 'transactions.event_id')
         .select(
           eb => [
-            'id',
-            'transaction_at',
-            'credit',
-            'debit',
-            'balance',
-            'transaction_category',
-            'transaction_mode',
-            'tags',
+            'transactions.id',
+            'transactions.transaction_at',
+            'transactions.credit',
+            'transactions.debit',
+            'transactions.balance',
+            'transactions.transaction_category',
+            'transactions.transaction_mode',
+            'transactions.tags',
+            'transactions.event_id',
+            'e.name as event_name',
             jsonObjectFrom(withCategoryQuery(
               withRangeQuery(eb
                 .selectFrom('transactions'), _range),
               _categories,
             )
               .select(_eb => [
-                _eb.fn.count<number>('id').as('transactions_count'),
-                _eb.fn.sum<number>('debit').as('total_debit'),
-                _eb.fn.sum<number>('credit').as('total_credit'),
+                _eb.fn.count<number>('transactions.id').as('transactions_count'),
+                _eb.fn.sum<number>('transactions.debit').as('total_debit'),
+                _eb.fn.sum<number>('transactions.credit').as('total_credit'),
               ]),
             ).as('aggr'),
           ],
         )
-        .orderBy(sql`unixepoch(transaction_at)`, _order)
+        .orderBy(sql`unixepoch(transactions.transaction_at)`, _order)
         .limit(15)
         .offset(_page * 15)
 
       return await query.execute()
+    },
+    {
+      defautlValue: [],
     },
   )
 
@@ -351,11 +450,23 @@ export function TransactionsTable() {
     }
   }
 
+  const {
+    selectionState,
+    toggleFullSelection,
+    toggleSelection,
+    allSelected,
+    hasSelection,
+    resetSelection,
+  } = useTableSelection(
+    () => transactions.value?.map(it => it.id) ?? [],
+  )
+
   return (
-    <div className="border border-base-200 rounded-lg flex flex-col gap-4">
+    <div className="border border-base-200 rounded-lg flex flex-col gap-4 relative">
       <div className="font-semibold text-sm px-4 pt-4">
         Transactions
       </div>
+
       <div className="flex items-center justify-between px-4 relative">
         <div class="flex items-center gap-2 group">
           <div class="text-xs">
@@ -392,13 +503,30 @@ export function TransactionsTable() {
         </div>
 
         <RangePicker range={range} />
-
       </div>
+
+      {
+        hasSelection.value && (
+          <SelectionActionsRow
+            resetSelection={resetSelection}
+            selectionState={selectionState}
+          />
+        )
+      }
+
       <div class="overflow-x-auto max-h-80">
         <table class="table table-zebra table-xs table-pin-rows">
           {/* head */}
           <thead>
             <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleFullSelection}
+                  className="checkbox checkbox-xs"
+                />
+              </th>
               <th>ID</th>
               <th>Date</th>
               <th>
@@ -414,6 +542,7 @@ export function TransactionsTable() {
                 </span>
               </th>
               <th>Category</th>
+              <th>Event</th>
               <th>Method</th>
               <th>Balance</th>
             </tr>
@@ -421,7 +550,14 @@ export function TransactionsTable() {
           <tbody>
             {
               transactions.value?.map((it) => {
-                return <TransactionRow transaction={it} key={it.id} />
+                return (
+                  <TransactionRow
+                    transaction={it}
+                    key={it.id}
+                    isSelected={selectionState.value.has(it.id)}
+                    onSelect={() => toggleSelection(it)}
+                  />
+                )
               })
             }
             {
