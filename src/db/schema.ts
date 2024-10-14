@@ -1,5 +1,16 @@
 import type { Generated, Insertable, Selectable, Updateable } from 'kysely'
 
+export interface EventTable {
+  id: Generated<number>
+  name: string | null
+  start_at: string | null
+  end_at: string | null
+}
+
+export type EventModel = Selectable<EventTable>
+export type EventInsert = Insertable<EventTable>
+export type EventUpdate = Updateable<EventTable>
+
 export interface TransactionsTable {
   id: Generated<number>
   meta: string
@@ -44,6 +55,10 @@ export interface TransactionsTable {
   tags: string[]
   created_at: Date
   updated_at: Date
+  /**
+   * transaction is a part of event or group
+   */
+  event_id: number | null
 }
 
 export type TransactionModel = Selectable<TransactionsTable>
@@ -52,4 +67,12 @@ export type TransactionUpdate = Updateable<TransactionsTable>
 
 export interface Database {
   transactions: TransactionsTable
+  events: EventTable
+}
+
+/**
+ * is an object if looks like a model. has an id
+ */
+export interface IModelLike {
+  id: number
 }

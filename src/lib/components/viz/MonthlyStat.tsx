@@ -1,7 +1,6 @@
 import type { ChartData, ChartSeriesData } from '@shelacek/plotery'
 import { useComputed } from '@preact/signals'
 import { BarLine, CardinalLine, Chart, LinearAxis, Tooltip } from '@shelacek/plotery'
-import CarbonDotMark from '~icons/carbon/dot-mark'
 import { sql } from 'kysely'
 import * as R from 'remeda'
 import { titleCase } from 'scule'
@@ -14,6 +13,7 @@ import { formatCurrency } from '../../utils/currency'
 import { dateFormat } from '../../utils/date'
 import { Highlight } from '../plotery/Highlight'
 import { ByogaToolTip } from '../plotery/ToolTip'
+import CarbonDotMark from '~icons/carbon/dot-mark'
 
 function formatMonthYear(monthStr: string | undefined | null) {
   if (typeof monthStr !== 'string')

@@ -1,8 +1,8 @@
 import type { Static, StaticDecode } from '@sinclair/typebox'
-import type { TTransactionMode } from './transaction_mode'
 import { Type } from '@sinclair/typebox'
 import { TypeCompiler } from '@sinclair/typebox/compiler'
 import { parseMeta } from '../parsers/meta'
+import type { TTransactionMode } from './transaction_mode'
 
 function deafaultNull(value: string): string | null {
   return value.length === 0 ? null : value.replaceAll(',', '')

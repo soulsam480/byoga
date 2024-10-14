@@ -25,8 +25,8 @@ export const ${migrationName}: Migration = {
   }
 }
 
-const INSERT_IMPORT_MARKER = '//IMPORT'
-const INSERT_ITEM_MARKER = '//REGISTER'
+const INSERT_IMPORT_MARKER = '// IMPORT'
+const INSERT_ITEM_MARKER = '// REGISTER'
 
 async function updateMigrationRegistry(
   filePath: string,
@@ -41,10 +41,10 @@ async function updateMigrationRegistry(
 
   if (registryContent.length === 0) {
     registryContent = `import { Migration } from 'kysely';
-//IMPORT
+${INSERT_IMPORT_MARKER}
 
 export const migrations: Record<string, Migration> = {
-  //REGISTER
+  ${INSERT_ITEM_MARKER}
 };
 `
 
@@ -80,7 +80,7 @@ async function main() {
   try {
     await portfinder.getPortPromise({ port: 5173, stopPort: 5173 })
   }
-  catch (error) {
+  catch (_) {
     isDevRunning = true
   }
 

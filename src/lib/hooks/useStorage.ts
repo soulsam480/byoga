@@ -1,4 +1,4 @@
-import { effect, type Signal, signal } from '@preact/signals'
+import { type Signal, effect, signal } from '@preact/signals'
 
 function createKey(key: string) {
   return `byoga_${key}`

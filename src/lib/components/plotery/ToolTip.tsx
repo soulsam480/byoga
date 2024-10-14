@@ -1,6 +1,6 @@
 import type { ChartAttributes, ChartData } from '@shelacek/plotery'
-import CarbonDotMark from '~icons/carbon/dot-mark'
 import { Fragment } from 'preact/jsx-runtime'
+import CarbonDotMark from '~icons/carbon/dot-mark'
 
 interface ITooltipProps extends Partial<ChartAttributes> {
   position?: [number, number]
@@ -12,6 +12,7 @@ function getPoints(position: number, data: ChartData) {
   if (Array.isArray(data)) {
     const diffs = data.map(x => Math.abs(position - x[0]))
     const point = data[diffs.findIndex(x => x === Math.min(...diffs))]
+
     return point
   }
 
@@ -38,7 +39,7 @@ export function ByogaToolTip({
   renderText = ([_, point]) => point[1].toFixed(2),
   host,
 }: ITooltipProps) {
-  if (!data || !axes || !position || !rect || !host) {
+  if (!data || data.length === 0 || !axes || !position || !rect || !host) {
     return null
   }
 

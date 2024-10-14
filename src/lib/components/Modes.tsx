@@ -1,6 +1,6 @@
-import type { TransactionModel } from '../../db/schema'
 import { useComputed } from '@preact/signals'
 import * as R from 'remeda'
+import type { TransactionModel } from '../../db/schema'
 import { db } from '../../db/client'
 import { startDatabase } from '../../db/lib/migrator'
 import { useQuery } from '../query/useQuery'
