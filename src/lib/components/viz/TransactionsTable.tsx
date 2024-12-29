@@ -14,6 +14,7 @@ import CarbonArrowUpRight from '~icons/carbon/arrow-up-right'
 import CarbonCheckmarkFilled from '~icons/carbon/checkmark-filled'
 import CarbonCloseFilled from '~icons/carbon/close-filled'
 import CarbonDotMark from '~icons/carbon/dot-mark'
+import CarbonSearchLocateMirror from '~icons/carbon/search-locate-mirror'
 import CarbonSortAscending from '~icons/carbon/sort-ascending'
 import CarbonSortDescending from '~icons/carbon/sort-descending'
 import CarbonTriangleLeftSolid from '~icons/carbon/triangle-left-solid'
@@ -38,7 +39,7 @@ interface ITransactionRowProps {
   | 'balance'
   | 'transaction_category'
   | 'transaction_mode'
-  | 'tags' > & { event_name: string | null }
+  | 'tags'> & { event_name: string | null }
   onSelect: () => void
   isSelected: boolean
 }
@@ -132,7 +133,7 @@ function AggregateRow({ total_credit, total_debit }: IAggregateRowProps) {
           <td>
             =
             {' '}
-            {formatCurrency(total_credit) }
+            {formatCurrency(total_credit)}
           </td>
         )
       }
@@ -142,12 +143,12 @@ function AggregateRow({ total_credit, total_debit }: IAggregateRowProps) {
           <td>
             =
             {' '}
-            {formatCurrency(total_debit) }
+            {formatCurrency(total_debit)}
           </td>
         )
       }
 
-      <td colSpan={3}></td>
+      <td colSpan={4}></td>
 
     </tr>
   )
@@ -367,6 +368,7 @@ export function TransactionsTable() {
   const range = useSignal<TStaticRanges | [Date, Date]>('this_month')
   const categories = useSignal<TransactionModel['transaction_category'][]>([])
   const order = useSignal<TOrderDirection>('desc')
+  const search = useSignal('')
 
   useSignalEffect(() => {
     // to subscribe
@@ -381,6 +383,7 @@ export function TransactionsTable() {
       range.value,
       categories.value,
       order.value,
+      search.value,
       page.value.toString(),
     ],
     async () => {
@@ -390,6 +393,7 @@ export function TransactionsTable() {
       const _page = page.value
       const _categories = categories.value
       const _order = order.value
+      const _search = search.value
 
       const query = withCategoryQuery(
         withRangeQuery(db.selectFrom('transactions'), _range),
@@ -421,6 +425,11 @@ export function TransactionsTable() {
             ).as('aggr'),
           ],
         )
+        .where(eb => sql`exists (
+              select 1 
+              from json_each(${eb.ref('transactions.tags')}) 
+              where json_each.value like ${`%${_search}%`}
+            )`)
         .orderBy(sql`unixepoch(transactions.transaction_at)`, _order)
         .limit(15)
         .offset(_page * 15)
@@ -463,8 +472,31 @@ export function TransactionsTable() {
 
   return (
     <div className="border border-base-200 rounded-lg flex flex-col gap-4 relative">
-      <div className="font-semibold text-sm px-4 pt-4">
-        Transactions
+      <div className="flex items-center justify-between px-4 pt-4">
+        <div className="font-semibold text-sm">
+          Transactions
+        </div>
+        <label
+          className="input input-bordered input-xs w-full max-w-48 flex items-center gap-1"
+        >
+          <CarbonSearchLocateMirror />
+          <input
+            type="text"
+            placeholder="Search & press enter"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                search.value = e.currentTarget.value ?? ''
+              }
+            }}
+            onChange={(e) => {
+              if (e.currentTarget.value !== '')
+                return
+
+              search.value = e.currentTarget.value ?? ''
+            }}
+            value={search}
+          />
+        </label>
       </div>
 
       <div className="flex items-center justify-between px-4 relative">
