@@ -1,0 +1,53 @@
+diff --git a/package.json b/package.json
+index 3c540b0214545504cb256b121dfa22fb072c8333..26ddb810f1f17d9b4e43bd1c478d5b0e7d17471a 100644
+--- a/package.json
++++ b/package.json
+@@ -9,9 +9,20 @@
+ 	"style": "dist/css/plotery.css",
+ 	"scss": "dist/scss/plotery.scss",
+ 	"exports": {
+-		"require": "./dist/plotery.js",
+-		"import": "./dist/plotery.es.js",
+-		"default": "./dist/plotery.es.js"
++		".": {
++			"require": "./dist/plotery.js",
++			"import": "./dist/plotery.es.js",
++			"default": "./dist/plotery.es.js",
++			"types": "./dist/plotery.d.ts"
++		},
++		"./dist/*.css": {
++			"import": "./dist/*.css",
++			"require": "./dist/*.css"
++		},
++		"./dist/*.scss": {
++			"import": "./dist/*.scss",
++			"require": "./dist/*.scss"
++		}
+ 	},
+ 	"scripts": {
+ 		"prebuild": "rm -rf dist",
+@@ -27,13 +38,7 @@
+ 		"type": "git",
+ 		"url": "https://shelacek@bitbucket.org/shelacek/plotery.git"
+ 	},
+-	"keywords": [
+-		"plot",
+-		"chart",
+-		"charts",
+-		"graph",
+-		"preact"
+-	],
++	"keywords": ["plot", "chart", "charts", "graph", "preact"],
+ 	"author": "Ales Kurecka",
+ 	"license": "MIT",
+ 	"bugs": {
+@@ -61,8 +66,6 @@
+ 	"peerDependencies": {
+ 		"preact": "^10.0.0"
+ 	},
+-	"files": [
+-		"dist/**"
+-	],
++	"files": ["dist/**"],
+ 	"sideEffects": false
+ }
