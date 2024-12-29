@@ -1,5 +1,5 @@
-import { useComputed, useSignal } from '@preact/signals'
 import type { IModelLike } from '../../db/schema'
+import { useComputed, useSignal } from '@preact/signals'
 
 /**
  * function handling state for table row seelction/multi selection

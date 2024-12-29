@@ -1,8 +1,8 @@
 import { titleCase } from 'scule'
+import CarbonCloseOutline from '~icons/carbon/close-outline'
+import CarbonDotMark from '~icons/carbon/dot-mark'
 import { TRANSACTION_CATEGORIES } from '../../db/lib/constants/categories'
 import { colorFromSeed } from '../utils/color'
-import CarbonDotMark from '~icons/carbon/dot-mark'
-import CarbonCloseOutline from '~icons/carbon/close-outline'
 
 export function HelpModal() {
   return (

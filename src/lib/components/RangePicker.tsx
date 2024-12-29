@@ -1,15 +1,15 @@
 import type { Signal } from '@preact/signals'
 import type { SelectQueryBuilder } from 'kysely'
 import type { IterableElement, UnknownRecord } from 'type-fest'
-import { RangePlugin, easepick } from '@easepick/bundle'
+import { easepick, RangePlugin } from '@easepick/bundle'
 import easepickStyle from '@easepick/bundle/dist/index.css?url'
 import { useComputed, useSignalEffect } from '@preact/signals'
 import clsx from 'clsx'
 import { sql } from 'kysely'
 import { useCallback, useEffect, useRef } from 'preact/hooks'
 import { titleCase } from 'scule'
-import { dateFormat } from '../utils/date'
 import CarbonCalendar from '~icons/carbon/calendar'
+import { dateFormat } from '../utils/date'
 import './rangepicker.css'
 
 function getCurrentMonthStart() {

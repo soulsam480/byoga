@@ -1,5 +1,5 @@
-import { db } from '../../db/client'
 import type { EventInsert } from '../../db/schema'
+import { db } from '../../db/client'
 import { invalidateQuery, useQuery } from '../query/useQuery'
 
 export function useEvents() {

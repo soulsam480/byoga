@@ -1,4 +1,3 @@
-import type { Plugin } from 'vite'
 import preact from '@preact/preset-vite'
 import Unfonts from 'unplugin-fonts/vite'
 import Icons from 'unplugin-icons/vite'
@@ -7,7 +6,7 @@ import inspect from 'vite-plugin-inspect'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
 
-function SQLiteDevPlugin(): Plugin {
+function SQLiteDevPlugin() {
   return {
     name: 'configure-response-headers',
     configureServer: (server) => {
@@ -105,7 +104,10 @@ const config = defineConfig({
   resolve: {
     dedupe: ['preact'],
     alias: [
-      { find: 'frappe-charts', replacement: 'frappe-charts/dist/frappe-charts.min.esm' },
+      {
+        find: 'frappe-charts',
+        replacement: 'frappe-charts/dist/frappe-charts.min.esm',
+      },
       { find: 'react', replacement: 'preact/compat' },
       { find: 'react-dom/test-utils', replacement: 'preact/test-utils' },
       { find: 'react-dom', replacement: 'preact/compat' },

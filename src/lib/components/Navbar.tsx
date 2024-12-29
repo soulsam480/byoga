@@ -1,16 +1,16 @@
 import clsx from 'clsx'
 import { endpointSymbol } from 'vite-plugin-comlink/symbol'
+import CarbonChartArea from '~icons/carbon/chart-area'
+import CarbonDocumentImport from '~icons/carbon/document-import'
+import CarbonHelpFilled from '~icons/carbon/help-filled'
+import CarbonReset from '~icons/carbon/reset'
+import CarbonSettings from '~icons/carbon/settings'
 import { db, deleteDB } from '../../db/client'
 import { useRouter } from '../hooks/useRouter'
 import { invalidateQuery } from '../query/useQuery'
 import { logger } from '../utils/logger'
 import { showAlert } from './Alerts'
 import { HelpModal } from './HelpModal'
-import CarbonSettings from '~icons/carbon/settings'
-import CarbonReset from '~icons/carbon/reset'
-import CarbonHelpFilled from '~icons/carbon/help-filled'
-import CarbonDocumentImport from '~icons/carbon/document-import'
-import CarbonChartArea from '~icons/carbon/chart-area'
 
 async function importFile() {
   const worker = new ComlinkWorker<

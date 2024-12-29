@@ -10,5 +10,5 @@
     "noEmit": true,
     "types": ["vitest/globals"]
   },
-  "include": ["vite.config.ts"]
+  "include": []
 }
