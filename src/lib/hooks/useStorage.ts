@@ -13,7 +13,9 @@ export function useStorage<K>(_key: string, defaultValue: K): Signal<K> {
     localStorage.setItem(key, JSON.stringify(defaultValue))
   }
 
-  const state = signal(fromStore === null ? defaultValue : JSON.parse(fromStore))
+  const state = signal(
+    fromStore === null ? defaultValue : JSON.parse(fromStore)
+  )
 
   effect(() => {
     const stateVal = state.value

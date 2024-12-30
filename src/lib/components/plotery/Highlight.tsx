@@ -4,18 +4,25 @@ import clsx from 'clsx'
 
 interface IHighlightProps extends Partial<ChartAttributes> {
   limits:
-    {
-      x1: number
-      x2: number
-    } | {
-      y1: number
-      y2: number
-    }
+    | {
+        x1: number
+        x2: number
+      }
+    | {
+        y1: number
+        y2: number
+      }
   class?: string
   children?: ComponentChild
 }
 
-export function Highlight({ rect, axes, limits, class: className, children }: IHighlightProps) {
+export function Highlight({
+  rect,
+  axes,
+  limits,
+  class: className,
+  children
+}: IHighlightProps) {
   if (!axes?.x || !axes?.y || rect === undefined) {
     return null
   }
@@ -24,7 +31,7 @@ export function Highlight({ rect, axes, limits, class: className, children }: IH
     !('x1' in limits) ? 0 : axes.x.scale(limits.x1),
     !('x2' in limits) ? rect.width : axes.x.scale(limits.x2),
     !('y2' in limits) ? 0 : axes.y.scale(limits.y2),
-    !('y1' in limits) ? rect.height : axes.y.scale(limits.y1),
+    !('y1' in limits) ? rect.height : axes.y.scale(limits.y1)
   ]
 
   const x = c[0]
@@ -35,15 +42,19 @@ export function Highlight({ rect, axes, limits, class: className, children }: IH
 
   return (
     <g>
-      <rect x={x} y={y} width={width} height={height} class={clsx('highlight', className)} />
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        class={clsx('highlight', className)}
+      />
       {children && (
         <foreignObject x={x} y={y} width={width} height={height}>
           {/* @ts-expect-error bad types */}
-          <body xmlns="http://www.w3.org/1999/xhtml">
-            {children}
-          </body>
+          <body xmlns='http://www.w3.org/1999/xhtml'>{children}</body>
         </foreignObject>
       )}
     </g>
   )
-};
+}

@@ -29,28 +29,23 @@ const ALERT_TO_CLASS_MAP: Record<IAlert['type'], string> = {
   error: 'alert-error',
   info: 'alert-info',
   success: 'alert-success',
-  warning: 'alert-warning',
+  warning: 'alert-warning'
 }
 
 export function Alerts(): JSX.Element {
-  return (
-    createPortal(
-      <div class="fixed top-8 z-50 inset-x-0 flex flex-col gap-2 items-center justify-center">
-        {alerts.value.map((value) => {
-          return (
-            <div
-              role="alert"
-              className={clsx([
-                'alert max-w-96',
-                ALERT_TO_CLASS_MAP[value.type],
-              ])}
-            >
-              {value.message}
-            </div>
-          )
-        })}
-      </div>,
-      document.body,
-    )
+  return createPortal(
+    <div class='fixed top-8 z-50 inset-x-0 flex flex-col gap-2 items-center justify-center'>
+      {alerts.value.map(value => {
+        return (
+          <div
+            role='alert'
+            className={clsx(['alert max-w-96', ALERT_TO_CLASS_MAP[value.type]])}
+          >
+            {value.message}
+          </div>
+        )
+      })}
+    </div>,
+    document.body
   )
 }

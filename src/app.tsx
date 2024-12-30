@@ -14,13 +14,12 @@ export function App() {
   const { page } = useRouter()
 
   return (
-    <main class="flex h-screen w-screen">
+    <main class='flex h-screen w-screen'>
       <Alerts />
       <Navbar />
 
       {page.value === 'home' && <Home />}
       {page.value === 'settings' && <Settings />}
-
     </main>
   )
 }

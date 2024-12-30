@@ -4,7 +4,9 @@ import { useComputed, useSignal } from '@preact/signals'
 /**
  * function handling state for table row seelction/multi selection
  */
-export function useTableSelection<T extends IModelLike>(_rowIds: () => number[]) {
+export function useTableSelection<T extends IModelLike>(
+  _rowIds: () => number[]
+) {
   const rowIds = useComputed(_rowIds)
 
   const selectionState = useSignal<Set<number>>(new Set())
@@ -20,8 +22,7 @@ export function useTableSelection<T extends IModelLike>(_rowIds: () => number[])
 
     if (localVal.has(model.id)) {
       localVal.delete(model.id)
-    }
-    else {
+    } else {
       localVal.add(model.id)
     }
 
@@ -55,6 +56,6 @@ export function useTableSelection<T extends IModelLike>(_rowIds: () => number[])
     getSelected,
     allSelected,
     hasSelection,
-    resetSelection,
+    resetSelection
   }
 }

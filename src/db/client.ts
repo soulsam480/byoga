@@ -4,7 +4,9 @@ import { SQLocalKysely } from 'sqlocal/kysely'
 import { kyselyLogger } from './lib/logger'
 import { TypeBoxModelsPlugin } from './lib/plugins/models'
 
-const databasePath = import.meta.env.PROD ? 'db.sqlite3' : 'development/db.sqlite3'
+const databasePath = import.meta.env.PROD
+  ? 'db.sqlite3'
+  : 'development/db.sqlite3'
 
 async function deleteDB() {
   let opfsRoot = await window.navigator.storage.getDirectory()
@@ -30,10 +32,7 @@ const { dialect, sql, destroy } = new SQLocalKysely(databasePath)
 const db = new Kysely<Database>({
   dialect,
   log: kyselyLogger,
-  plugins: [
-    new TypeBoxModelsPlugin(),
-    new ParseJSONResultsPlugin(),
-  ],
+  plugins: [new TypeBoxModelsPlugin(), new ParseJSONResultsPlugin()]
 })
 
 export { db, deleteDB, destroy, sql }

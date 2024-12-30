@@ -23,48 +23,80 @@ function getCurrentMonthStart() {
 
 const CURRENT_MONTH_START = getCurrentMonthStart()
 
-export const STATIC_RANGES = ['this_month', 'last_month', 'last_6_months', 'last_year', 'all_time'] as const
+export const STATIC_RANGES = [
+  'this_month',
+  'last_month',
+  'last_6_months',
+  'last_year',
+  'all_time'
+] as const
 
 export type TStaticRanges = IterableElement<typeof STATIC_RANGES>
 
 export type TRange = TStaticRanges | [Date, Date]
 
-function getStaticRangeQuery<Q extends SelectQueryBuilder<UnknownRecord, any, object>>(qb: Q) {
+function getStaticRangeQuery<
+  Q extends SelectQueryBuilder<UnknownRecord, any, object>
+>(qb: Q) {
   return {
     all_time: qb.where(sql`transaction_at`, '<', sql`date('now')`),
     last_year: qb.where(sql`transaction_at`, '>', sql`date('now','-365 days')`),
-    last_6_months: qb.where(eb => eb.and(
-      [
+    last_6_months: qb.where(eb =>
+      eb.and([
         // ideally this should be last month start but SQLite engine is behaving weirdly
-        eb(sql`transaction_at`, '<=', sql`date(${CURRENT_MONTH_START.toISOString()})`),
-        eb(sql`transaction_at`, '>', sql`date(${CURRENT_MONTH_START.toISOString()},'-6 months')`),
-      ],
-    )),
-    last_month: qb.where(eb => eb.and(
-      [
+        eb(
+          sql`transaction_at`,
+          '<=',
+          sql`date(${CURRENT_MONTH_START.toISOString()})`
+        ),
+        eb(
+          sql`transaction_at`,
+          '>',
+          sql`date(${CURRENT_MONTH_START.toISOString()},'-6 months')`
+        )
+      ])
+    ),
+    last_month: qb.where(eb =>
+      eb.and([
         // ideally this should be last month start but SQLite engine is behaving weirdly
-        eb(sql`transaction_at`, '<=', sql`date(${CURRENT_MONTH_START.toISOString()})`),
-        eb(sql`transaction_at`, '>', sql`date(${CURRENT_MONTH_START.toISOString()},'-30 days')`),
-      ],
-    )),
-    this_month: qb.where(eb => eb.and(
-      [
+        eb(
+          sql`transaction_at`,
+          '<=',
+          sql`date(${CURRENT_MONTH_START.toISOString()})`
+        ),
+        eb(
+          sql`transaction_at`,
+          '>',
+          sql`date(${CURRENT_MONTH_START.toISOString()},'-30 days')`
+        )
+      ])
+    ),
+    this_month: qb.where(eb =>
+      eb.and([
         eb(sql`transaction_at`, '>=', sql`date('now', 'start of month')`),
-        eb(sql`transaction_at`, '<', sql`date('now', 'start of month', '+1 month')`),
-      ],
-    )),
+        eb(
+          sql`transaction_at`,
+          '<',
+          sql`date('now', 'start of month', '+1 month')`
+        )
+      ])
+    )
   }
 }
 
-export function withRangeQuery<Q extends SelectQueryBuilder<UnknownRecord, any, object>>(qb: Q, range: TRange): Q {
+export function withRangeQuery<
+  Q extends SelectQueryBuilder<UnknownRecord, any, object>
+>(qb: Q, range: TRange): Q {
   if (typeof range === 'string') {
     return getStaticRangeQuery(qb)[range] as Q
   }
 
-  return qb.where(eb => eb.and([
-    eb(sql`transaction_at`, '>', sql`date(${range[0].toISOString()})`),
-    eb(sql`transaction_at`, '<', sql`date(${range[1].toISOString()})`),
-  ])) as Q
+  return qb.where(eb =>
+    eb.and([
+      eb(sql`transaction_at`, '>', sql`date(${range[0].toISOString()})`),
+      eb(sql`transaction_at`, '<', sql`date(${range[1].toISOString()})`)
+    ])
+  ) as Q
 }
 
 export function getRangeDisplayValue(range: TRange, showStatic = false) {
@@ -87,7 +119,9 @@ export function RangePicker({ range }: IRangePickerProps) {
   const datePicker = useRef<HTMLInputElement>(null)
   const picker = useRef<easepick.Core>(null)
 
-  const rangeDisplayValue = useComputed(() => getRangeDisplayValue(range.value, true))
+  const rangeDisplayValue = useComputed(() =>
+    getRangeDisplayValue(range.value, true)
+  )
 
   useSignalEffect(() => {
     if (!Array.isArray(range.value)) {
@@ -96,21 +130,18 @@ export function RangePicker({ range }: IRangePickerProps) {
   })
 
   useEffect(() => {
-    if (datePicker.current === null)
-      return
+    if (datePicker.current === null) return
 
     // eslint-disable-next-line new-cap
     picker.current = new easepick.create({
       element: datePicker.current,
-      css: [
-        easepickStyle,
-      ],
+      css: [easepickStyle],
       plugins: [RangePlugin],
       RangePlugin: {
-        tooltip: true,
+        tooltip: true
       },
       setup(picker) {
-        picker.on('select', (e) => {
+        picker.on('select', e => {
           range.value = [e.detail.start, e.detail.end]
 
           picker.hide()
@@ -122,7 +153,7 @@ export function RangePicker({ range }: IRangePickerProps) {
             picker.setDateRange(start, end)
           }
         })
-      },
+      }
     })
   }, [])
 
@@ -138,50 +169,41 @@ export function RangePicker({ range }: IRangePickerProps) {
   }, [range])
 
   return (
-    <div class="relative">
-      <div className="dropdown dropdown-end">
+    <div class='relative'>
+      <div className='dropdown dropdown-end'>
         <div
           tabIndex={0}
-          role="button"
-          className={clsx(
-            'text-xs cursor-pointer flex gap-1 items-center',
-          )}
+          role='button'
+          className={clsx('text-xs cursor-pointer flex gap-1 items-center')}
         >
           <CarbonCalendar />
-          <span>
-            {rangeDisplayValue}
-          </span>
+          <span>{rangeDisplayValue}</span>
         </div>
 
-        <ul tabIndex={0} className="dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-52 p-2 shadow">
-          {
-            STATIC_RANGES.map((value) => {
-              return (
-                <li
-                  key={value}
-                  onClick={() => {
-                    range.value = value
+        <ul
+          tabIndex={0}
+          className='dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-52 p-2 shadow'
+        >
+          {STATIC_RANGES.map(value => {
+            return (
+              <li
+                key={value}
+                onClick={() => {
+                  range.value = value
 
-                    // @ts-expect-error bad types
-                    document.activeElement?.blur()
-                  }}
-                >
-                  <span
-                    class={clsx(range.value === value && 'active')}
-                  >
-                    {titleCase(value)}
-                  </span>
-                </li>
-              )
-            })
-          }
+                  // @ts-expect-error bad types
+                  document.activeElement?.blur()
+                }}
+              >
+                <span class={clsx(range.value === value && 'active')}>
+                  {titleCase(value)}
+                </span>
+              </li>
+            )
+          })}
 
-          <li
-            onClick={handleCustomClick}
-          >
-            <span
-              class={clsx(Array.isArray(range.value) && 'active')}
-            >
+          <li onClick={handleCustomClick}>
+            <span class={clsx(Array.isArray(range.value) && 'active')}>
               Custom
             </span>
           </li>
@@ -189,7 +211,7 @@ export function RangePicker({ range }: IRangePickerProps) {
       </div>
 
       <input
-        className="opacity-0 absolute z-10 inset-0 cursor-pointer invisible"
+        className='opacity-0 absolute z-10 inset-0 cursor-pointer invisible'
         ref={datePicker}
         readonly
         tabIndex={-1}

@@ -30,14 +30,16 @@ export const Migration1720360595599AddTransaction: Migration = {
       .addColumn('tags', 'text', col => col.defaultTo('[]'))
 
       .addColumn('created_at', 'text', col =>
-        col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull())
+        col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
+      )
 
       .addColumn('updated_at', 'text', col =>
-        col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull())
+        col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
+      )
 
       .execute()
   },
   async down(db: Kysely<any>) {
     await db.schema.dropTable('transactions').execute()
-  },
+  }
 }

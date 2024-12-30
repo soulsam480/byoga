@@ -21,7 +21,7 @@ export const ${migrationName}: Migration = {
     //
   },
 };
-`,
+`
   }
 }
 
@@ -31,9 +31,12 @@ const INSERT_ITEM_MARKER = '// REGISTER'
 async function updateMigrationRegistry(
   filePath: string,
   exportName: string,
-  key: number,
+  key: number
 ) {
-  const registryPath = path.join(import.meta.dirname, '../src/db/migrations/index.ts')
+  const registryPath = path.join(
+    import.meta.dirname,
+    '../src/db/migrations/index.ts'
+  )
 
   await ensureFile(registryPath)
 
@@ -55,19 +58,19 @@ export const migrations: Record<string, Migration> = {
     // eslint-disable-next-line regexp/no-useless-flag
     new RegExp(INSERT_IMPORT_MARKER, 'gm'),
     `import { ${exportName} } from './${filePath}';
-${INSERT_IMPORT_MARKER}`,
+${INSERT_IMPORT_MARKER}`
   )
 
   registryContent = registryContent.replace(
     // eslint-disable-next-line regexp/no-useless-flag
     new RegExp(INSERT_ITEM_MARKER, 'gm'),
     `${key}: ${exportName},
-  ${INSERT_ITEM_MARKER}`,
+  ${INSERT_ITEM_MARKER}`
   )
 
   await writeFile(registryPath, registryContent, {
     encoding: 'utf8',
-    flag: 'w',
+    flag: 'w'
   })
 }
 
@@ -79,13 +82,14 @@ async function main() {
 
   try {
     await portfinder.getPortPromise({ port: 5173, stopPort: 5173 })
-  }
-  catch (_) {
+  } catch (_) {
     isDevRunning = true
   }
 
   if (isDevRunning) {
-    console.error(colors.bgRed.white.bold('\n--------- STOP DEV SERVER FIRST ---------\n'))
+    console.error(
+      colors.bgRed.white.bold('\n--------- STOP DEV SERVER FIRST ---------\n')
+    )
     process.exit(1)
   }
 
@@ -109,7 +113,11 @@ async function main() {
 
   await updateMigrationRegistry(fileName, migrationName, timestamp)
 
-  console.info(colors.bgBlue.white.bold(`\nMigration ${fileName} created.\n Run dev server after migration is implemented.\n`))
+  console.info(
+    colors.bgBlue.white.bold(
+      `\nMigration ${fileName} created.\n Run dev server after migration is implemented.\n`
+    )
+  )
 }
 
 void main()

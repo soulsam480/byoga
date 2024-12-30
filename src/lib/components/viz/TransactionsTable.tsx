@@ -29,17 +29,24 @@ import { invalidateRelatedQuery, useQuery } from '../../query/useQuery'
 import { colorFromSeed } from '../../utils/color'
 import { formatCurrency } from '../../utils/currency'
 import { dateFormat } from '../../utils/date'
-import { getRangeDisplayValue, RangePicker, withRangeQuery } from '../RangePicker'
+import {
+  getRangeDisplayValue,
+  RangePicker,
+  withRangeQuery
+} from '../RangePicker'
 
 interface ITransactionRowProps {
-  transaction: Pick<TransactionModel, 'id'
-  | 'transaction_at'
-  | 'credit'
-  | 'debit'
-  | 'balance'
-  | 'transaction_category'
-  | 'transaction_mode'
-  | 'tags'> & { event_name: string | null }
+  transaction: Pick<
+    TransactionModel,
+    | 'id'
+    | 'transaction_at'
+    | 'credit'
+    | 'debit'
+    | 'balance'
+    | 'transaction_category'
+    | 'transaction_mode'
+    | 'tags'
+  > & { event_name: string | null }
   onSelect: () => void
   isSelected: boolean
 }
@@ -51,63 +58,54 @@ interface ITransactionCategoryProps {
 
 function TransactionCategory({ category, checked }: ITransactionCategoryProps) {
   return (
-    <span class="inline-flex gap-1">
+    <span class='inline-flex gap-1'>
       <CarbonDotMark style={`color: ${colorFromSeed(category)};`} />
       {titleCase(category)}
-      {
-        checked && (
-          <CarbonCheckmarkFilled class="ml-auto text-[10px]" />
-        )
-      }
+      {checked && <CarbonCheckmarkFilled class='ml-auto text-[10px]' />}
     </span>
   )
 }
 
-function TransactionRow({ transaction, isSelected, onSelect }: ITransactionRowProps) {
+function TransactionRow({
+  transaction,
+  isSelected,
+  onSelect
+}: ITransactionRowProps) {
   return (
-    <tr class="row">
+    <tr class='row'>
       <td>
         <input
-          type="checkbox"
+          type='checkbox'
           checked={isSelected}
           onChange={onSelect}
-          className="checkbox checkbox-xs"
+          className='checkbox checkbox-xs'
         />
       </td>
 
-      <td class="inline-flex gap-1">
-        {transaction.credit === null
-          ? <CarbonArrowUpRight class="stroke-2 text-secondary" />
-          : <CarbonArrowDownLeft class="stroke-2 text-primary" />}
+      <td class='inline-flex gap-1'>
+        {transaction.credit === null ? (
+          <CarbonArrowUpRight class='stroke-2 text-secondary' />
+        ) : (
+          <CarbonArrowDownLeft class='stroke-2 text-primary' />
+        )}
         {transaction.id}
       </td>
 
       <td>{dateFormat(transaction.transaction_at).mmmddyyyy()}</td>
 
-      <td>
-        {formatCurrency(transaction.credit)}
-      </td>
+      <td>{formatCurrency(transaction.credit)}</td>
+
+      <td>{formatCurrency(transaction.debit)}</td>
 
       <td>
-        {formatCurrency(transaction.debit)}
-      </td>
-
-      <td>
-        <span
-          className="tooltip"
-          data-tip={transaction.tags.join(', ')}
-        >
+        <span className='tooltip' data-tip={transaction.tags.join(', ')}>
           <TransactionCategory category={transaction.transaction_category} />
         </span>
       </td>
 
-      <td>
-        {transaction.event_name ?? '-'}
-      </td>
+      <td>{transaction.event_name ?? '-'}</td>
 
-      <td>
-        {titleCase(transaction.transaction_mode).toUpperCase()}
-      </td>
+      <td>{titleCase(transaction.transaction_mode).toUpperCase()}</td>
 
       {transaction.balance !== null && (
         <td>{formatCurrency(transaction.balance)}</td>
@@ -123,33 +121,16 @@ interface IAggregateRowProps {
 
 function AggregateRow({ total_credit, total_debit }: IAggregateRowProps) {
   return (
-    <tr class="row">
-      <td colSpan={3} class="text-end">
+    <tr class='row'>
+      <td colSpan={3} class='text-end'>
         Total
       </td>
 
-      {
-        total_credit !== undefined && (
-          <td>
-            =
-            {' '}
-            {formatCurrency(total_credit)}
-          </td>
-        )
-      }
+      {total_credit !== undefined && <td>= {formatCurrency(total_credit)}</td>}
 
-      {
-        total_debit !== undefined && (
-          <td>
-            =
-            {' '}
-            {formatCurrency(total_debit)}
-          </td>
-        )
-      }
+      {total_debit !== undefined && <td>= {formatCurrency(total_debit)}</td>}
 
       <td colSpan={4}></td>
-
     </tr>
   )
 }
@@ -158,61 +139,54 @@ interface IChooseCategoriesDropdownProps {
   categories: Signal<TransactionModel['transaction_category'][]>
 }
 
-function ChooseCategoriesDropdown({ categories }: IChooseCategoriesDropdownProps) {
-  function handleCategorySelection(cat: TransactionModel['transaction_category']) {
+function ChooseCategoriesDropdown({
+  categories
+}: IChooseCategoriesDropdownProps) {
+  function handleCategorySelection(
+    cat: TransactionModel['transaction_category']
+  ) {
     if (categories.value.includes(cat)) {
       categories.value = categories.value.filter(it => it !== cat)
-    }
-    else {
+    } else {
       categories.value = [...categories.value, cat]
     }
   }
 
   return (
-    <div className="dropdown dropdown-bottom">
+    <div className='dropdown dropdown-bottom'>
       <div
         tabIndex={0}
-        role="button"
-        className={clsx(
-          'text-xs cursor-pointer flex gap-1 items-center',
-        )}
+        role='button'
+        className={clsx('text-xs cursor-pointer flex gap-1 items-center')}
       >
-        {
-          categories.value.length === 0
-            ? 'Choose category'
-            : (
-                <>
-                  <TransactionCategory category={categories.value[0]} />
-                  {
-                    categories.value.length > 1 && (
-                      <span>
-                        +
-                        {categories.value.length - 1}
-                        {' '}
-                        more
-                      </span>
-                    )
-                  }
-                </>
-              )
-        }
+        {categories.value.length === 0 ? (
+          'Choose category'
+        ) : (
+          <>
+            <TransactionCategory category={categories.value[0]} />
+            {categories.value.length > 1 && (
+              <span>+{categories.value.length - 1} more</span>
+            )}
+          </>
+        )}
       </div>
-      <ul tabIndex={0} className="dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-96 h-52 overflow-y-scroll p-2 shadow">
-        {
-          TRANSACTION_CATEGORIES.map((cat) => {
-            return (
-              <li key={cat} onClick={() => handleCategorySelection(cat)}>
-                <TransactionCategory
-                  category={cat}
-                  checked={categories.value.includes(cat)}
-                />
-              </li>
-            )
-          })
-        }
+      <ul
+        tabIndex={0}
+        className='dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-96 h-52 overflow-y-scroll p-2 shadow'
+      >
+        {TRANSACTION_CATEGORIES.map(cat => {
+          return (
+            <li key={cat} onClick={() => handleCategorySelection(cat)}>
+              <TransactionCategory
+                category={cat}
+                checked={categories.value.includes(cat)}
+              />
+            </li>
+          )
+        })}
 
         <li
-          class="mt-auto"
+          class='mt-auto'
           onClick={() => {
             categories.value = []
           }}
@@ -235,41 +209,46 @@ interface IOrderDropdownProps {
 
 const ORDER_TO_ICON_MAP: Record<TOrderDirection, FC> = {
   asc: CarbonSortAscending,
-  desc: CarbonSortDescending,
+  desc: CarbonSortDescending
 }
 
 const ORDER_TO_LABEL: Record<TOrderDirection, string> = {
   asc: 'Ascending',
-  desc: 'Descending',
+  desc: 'Descending'
 }
 
 function OrderDropdown({ order }: IOrderDropdownProps) {
   const CurrentIcon = useComputed(() => ORDER_TO_ICON_MAP[order.value])
 
   return (
-    <div className="dropdown dropdown-bottom">
+    <div className='dropdown dropdown-bottom'>
       <div
         tabIndex={0}
-        role="button"
-        className={clsx(
-          'text-xs cursor-pointer flex gap-2',
-        )}
+        role='button'
+        className={clsx('text-xs cursor-pointer flex gap-2')}
       >
         <CurrentIcon.value />
-        <span>
-          {ORDER_TO_LABEL[order.value]}
-        </span>
+        <span>{ORDER_TO_LABEL[order.value]}</span>
       </div>
-      <ul tabIndex={0} className="dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-40 overflow-y-scroll p-2 shadow">
+      <ul
+        tabIndex={0}
+        className='dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-40 overflow-y-scroll p-2 shadow'
+      >
         <li
-          onClick={() => { order.value = 'asc' }}
+          onClick={() => {
+            order.value = 'asc'
+          }}
         >
           <span class={clsx({ active: order.value === 'asc' })}>
             <ORDER_TO_ICON_MAP.asc />
             {ORDER_TO_LABEL.asc}
           </span>
         </li>
-        <li onClick={() => { order.value = 'desc' }}>
+        <li
+          onClick={() => {
+            order.value = 'desc'
+          }}
+        >
           <span class={clsx({ active: order.value === 'desc' })}>
             <ORDER_TO_ICON_MAP.desc />
             {ORDER_TO_LABEL.desc}
@@ -285,7 +264,10 @@ interface ISelectionActionsRowProps {
   resetSelection: () => void
 }
 
-function SelectionActionsRow({ selectionState, resetSelection }: ISelectionActionsRowProps) {
+function SelectionActionsRow({
+  selectionState,
+  resetSelection
+}: ISelectionActionsRowProps) {
   const { events } = useEvents()
 
   async function handleAddEventToTransactions(eventId: number) {
@@ -300,9 +282,9 @@ function SelectionActionsRow({ selectionState, resetSelection }: ISelectionActio
     event.preventDefault()
     event.stopImmediatePropagation()
 
-    const formData = Object
-      .fromEntries(new FormData(event.target as HTMLFormElement)
-        .entries()) as Record<'name', string>
+    const formData = Object.fromEntries(
+      new FormData(event.target as HTMLFormElement).entries()
+    ) as Record<'name', string>
 
     const newEvent = await createEvent(formData)
 
@@ -310,39 +292,55 @@ function SelectionActionsRow({ selectionState, resetSelection }: ISelectionActio
   }
 
   return (
-    <div className="flex items-center px-4 gap-2 relative">
-      <span class="text-xs">
-        <span class="font-semibold">{selectionState.value.size}</span>
-        {' '}
-        Selected
+    <div className='flex items-center px-4 gap-2 relative'>
+      <span class='text-xs'>
+        <span class='font-semibold'>{selectionState.value.size}</span> Selected
       </span>
 
-      <div className="dropdown dropdown-bottom">
-        <button tabIndex={0} role="button" className="btn btn-xs">Add to event</button>
-        <ul tabIndex={0} className="dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-52 p-2 shadow h-52 overflow-y-scroll">
-          {
-            events.value?.map((event) => {
-              return (
-                <li key={event.id} onClick={() => { handleAddEventToTransactions(event.id) }}><span>{event.name}</span></li>
-              )
-            })
-          }
+      <div className='dropdown dropdown-bottom'>
+        <button tabIndex={0} role='button' className='btn btn-xs'>
+          Add to event
+        </button>
+        <ul
+          tabIndex={0}
+          className='dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-52 p-2 shadow h-52 overflow-y-scroll'
+        >
+          {events.value?.map(event => {
+            return (
+              <li
+                key={event.id}
+                onClick={() => {
+                  handleAddEventToTransactions(event.id)
+                }}
+              >
+                <span>{event.name}</span>
+              </li>
+            )
+          })}
         </ul>
       </div>
 
-      <div className="dropdown dropdown-bottom">
-        <button className="btn btn-xs">Create new</button>
-        <div tabIndex={0} className="dropdown-content bg-base-100 rounded-box z-10 w-52 p-2 shadow">
-          <form onSubmit={handleEventCreationAndLink} class="flex flex-col gap-2">
+      <div className='dropdown dropdown-bottom'>
+        <button className='btn btn-xs'>Create new</button>
+        <div
+          tabIndex={0}
+          className='dropdown-content bg-base-100 rounded-box z-10 w-52 p-2 shadow'
+        >
+          <form
+            onSubmit={handleEventCreationAndLink}
+            class='flex flex-col gap-2'
+          >
             <input
-              type="text"
-              name="name"
-              placeholder="Event name"
-              className="input input-bordered input-sm w-full max-w-xs"
+              type='text'
+              name='name'
+              placeholder='Event name'
+              className='input input-bordered input-sm w-full max-w-xs'
             />
 
-            <div className="flex justify-end">
-              <button type="submit" className="btn btn-xs">Add Event</button>
+            <div className='flex justify-end'>
+              <button type='submit' className='btn btn-xs'>
+                Add Event
+              </button>
             </div>
           </form>
         </div>
@@ -351,10 +349,9 @@ function SelectionActionsRow({ selectionState, resetSelection }: ISelectionActio
   )
 }
 
-export function withCategoryQuery<Q extends SelectQueryBuilder<UnknownRecord, any, object>>(
-  qb: Q,
-  categories: TransactionModel['transaction_category'][],
-): Q {
+export function withCategoryQuery<
+  Q extends SelectQueryBuilder<UnknownRecord, any, object>
+>(qb: Q, categories: TransactionModel['transaction_category'][]): Q {
   if (categories.length === 0) {
     return qb
   }
@@ -384,7 +381,7 @@ export function TransactionsTable() {
       categories.value,
       order.value,
       search.value,
-      page.value.toString(),
+      page.value.toString()
     ],
     async () => {
       await startDatabase()
@@ -397,39 +394,38 @@ export function TransactionsTable() {
 
       const query = withCategoryQuery(
         withRangeQuery(db.selectFrom('transactions'), _range),
-        _categories,
+        _categories
       )
         .leftJoin('events as e', 'e.id', 'transactions.event_id')
-        .select(
-          eb => [
-            'transactions.id',
-            'transactions.transaction_at',
-            'transactions.credit',
-            'transactions.debit',
-            'transactions.balance',
-            'transactions.transaction_category',
-            'transactions.transaction_mode',
-            'transactions.tags',
-            'transactions.event_id',
-            'e.name as event_name',
-            jsonObjectFrom(withCategoryQuery(
-              withRangeQuery(eb
-                .selectFrom('transactions'), _range),
-              _categories,
-            )
-              .select(_eb => [
-                _eb.fn.count<number>('transactions.id').as('transactions_count'),
-                _eb.fn.sum<number>('transactions.debit').as('total_debit'),
-                _eb.fn.sum<number>('transactions.credit').as('total_credit'),
-              ]),
-            ).as('aggr'),
-          ],
-        )
-        .where(eb => sql`exists (
+        .select(eb => [
+          'transactions.id',
+          'transactions.transaction_at',
+          'transactions.credit',
+          'transactions.debit',
+          'transactions.balance',
+          'transactions.transaction_category',
+          'transactions.transaction_mode',
+          'transactions.tags',
+          'transactions.event_id',
+          'e.name as event_name',
+          jsonObjectFrom(
+            withCategoryQuery(
+              withRangeQuery(eb.selectFrom('transactions'), _range),
+              _categories
+            ).select(_eb => [
+              _eb.fn.count<number>('transactions.id').as('transactions_count'),
+              _eb.fn.sum<number>('transactions.debit').as('total_debit'),
+              _eb.fn.sum<number>('transactions.credit').as('total_credit')
+            ])
+          ).as('aggr')
+        ])
+        .where(
+          eb => sql`exists (
               select 1 
               from json_each(${eb.ref('transactions.tags')}) 
               where json_each.value like ${`%${_search}%`}
-            )`)
+            )`
+        )
         .orderBy(sql`unixepoch(transactions.transaction_at)`, _order)
         .limit(15)
         .offset(_page * 15)
@@ -437,11 +433,13 @@ export function TransactionsTable() {
       return await query.execute()
     },
     {
-      defautlValue: [],
-    },
+      defautlValue: []
+    }
   )
 
-  const total = useComputed(() => transactions.value?.[0]?.aggr?.transactions_count ?? 0)
+  const total = useComputed(
+    () => transactions.value?.[0]?.aggr?.transactions_count ?? 0
+  )
 
   const aggregateResults = useComputed(() => transactions.value?.[0]?.aggr)
 
@@ -449,11 +447,9 @@ export function TransactionsTable() {
     return () => {
       if (dir === 'reset') {
         page.value = 0
-      }
-      else if (dir === 'next') {
+      } else if (dir === 'next') {
         page.value = page.value + 1
-      }
-      else if (page.value !== 0) {
+      } else if (page.value !== 0) {
         page.value = page.value - 1
       }
     }
@@ -465,32 +461,25 @@ export function TransactionsTable() {
     toggleSelection,
     allSelected,
     hasSelection,
-    resetSelection,
-  } = useTableSelection(
-    () => transactions.value?.map(it => it.id) ?? [],
-  )
+    resetSelection
+  } = useTableSelection(() => transactions.value?.map(it => it.id) ?? [])
 
   return (
-    <div className="border border-base-200 rounded-lg flex flex-col gap-4 relative">
-      <div className="flex items-center justify-between px-4 pt-4">
-        <div className="font-semibold text-sm">
-          Transactions
-        </div>
-        <label
-          className="input input-bordered input-xs w-full max-w-48 flex items-center gap-1"
-        >
+    <div className='border border-base-200 rounded-lg flex flex-col gap-4 relative'>
+      <div className='flex items-center justify-between px-4 pt-4'>
+        <div className='font-semibold text-sm'>Transactions</div>
+        <label className='input input-bordered input-xs w-full max-w-48 flex items-center gap-1'>
           <CarbonSearchLocateMirror />
           <input
-            type="text"
-            placeholder="Search & press enter"
-            onKeyDown={(e) => {
+            type='text'
+            placeholder='Search & press enter'
+            onKeyDown={e => {
               if (e.key === 'Enter') {
                 search.value = e.currentTarget.value ?? ''
               }
             }}
-            onChange={(e) => {
-              if (e.currentTarget.value !== '')
-                return
+            onChange={e => {
+              if (e.currentTarget.value !== '') return
 
               search.value = e.currentTarget.value ?? ''
             }}
@@ -499,77 +488,60 @@ export function TransactionsTable() {
         </label>
       </div>
 
-      <div className="flex items-center justify-between px-4 relative">
-        <div class="flex items-center gap-2 group">
-          <div class="text-xs">
-            <span class="hover-emphasis">
-              Showing
-            </span>
-            {' '}
-            {Math.min(Math.min(Number(total.value), transactions.value?.length ?? 0), 15)}
-            {' '}
-            <span class="hover-emphasis">
-              from
-            </span>
-            {' '}
-            {total}
-            {' '}
-            transactions
-            {' '}
-            <span class="hover-emphasis">
-              of
-            </span>
+      <div className='flex items-center justify-between px-4 relative'>
+        <div class='flex items-center gap-2 group'>
+          <div class='text-xs'>
+            <span class='hover-emphasis'>Showing</span>{' '}
+            {Math.min(
+              Math.min(Number(total.value), transactions.value?.length ?? 0),
+              15
+            )}{' '}
+            <span class='hover-emphasis'>from</span> {total} transactions{' '}
+            <span class='hover-emphasis'>of</span>
           </div>
           <ChooseCategoriesDropdown categories={categories} />
-          <div class="text-xs">
+          <div class='text-xs'>
             {' '}
-            <span class="hover-emphasis">
-              in
-            </span>
-            {' '}
+            <span class='hover-emphasis'>in</span>{' '}
           </div>
           <OrderDropdown order={order} />
-          <div class="text-xs hover-emphasis">
-            order
-          </div>
+          <div class='text-xs hover-emphasis'>order</div>
         </div>
 
         <RangePicker range={range} />
       </div>
 
-      {
-        hasSelection.value && (
-          <SelectionActionsRow
-            resetSelection={resetSelection}
-            selectionState={selectionState}
-          />
-        )
-      }
+      {hasSelection.value && (
+        <SelectionActionsRow
+          resetSelection={resetSelection}
+          selectionState={selectionState}
+        />
+      )}
 
-      <div class="overflow-x-auto max-h-80">
-        <table class="table table-zebra table-xs table-pin-rows">
+      <div class='overflow-x-auto max-h-80'>
+        <table class='table table-zebra table-xs table-pin-rows'>
           {/* head */}
           <thead>
             <tr>
               <th>
                 <input
-                  type="checkbox"
+                  type='checkbox'
                   checked={allSelected}
                   onChange={toggleFullSelection}
-                  className="checkbox checkbox-xs"
+                  className='checkbox checkbox-xs'
                 />
               </th>
               <th>ID</th>
               <th>Date</th>
               <th>
-                <span class="inline-flex gap-1">
-                  <CarbonArrowDownLeft class="stroke-2 text-primary" />
+                <span class='inline-flex gap-1'>
+                  <CarbonArrowDownLeft class='stroke-2 text-primary' />
                   Credit
                 </span>
               </th>
               <th>
-                <span class="inline-flex gap-1">
-                  <CarbonArrowUpRight class="stroke-2 text-secondary" />
+                <span class='inline-flex gap-1'>
+                  <CarbonArrowUpRight class='stroke-2 text-secondary' />
                   Debit
                 </span>
               </th>
@@ -580,52 +552,53 @@ export function TransactionsTable() {
             </tr>
           </thead>
           <tbody>
-            {
-              transactions.value?.map((it) => {
-                return (
-                  <TransactionRow
-                    transaction={it}
-                    key={it.id}
-                    isSelected={selectionState.value.has(it.id)}
-                    onSelect={() => toggleSelection(it)}
-                  />
-                )
-              })
-            }
-            {
-              (aggregateResults.value?.total_credit || aggregateResults.value?.total_debit) && (
-                <AggregateRow
-                  total_credit={aggregateResults.value.total_credit}
-                  total_debit={aggregateResults.value.total_debit}
+            {transactions.value?.map(it => {
+              return (
+                <TransactionRow
+                  transaction={it}
+                  key={it.id}
+                  isSelected={selectionState.value.has(it.id)}
+                  onSelect={() => toggleSelection(it)}
                 />
               )
-            }
+            })}
+            {(aggregateResults.value?.total_credit ||
+              aggregateResults.value?.total_debit) && (
+              <AggregateRow
+                total_credit={aggregateResults.value.total_credit}
+                total_debit={aggregateResults.value.total_debit}
+              />
+            )}
           </tbody>
         </table>
 
-        {
-          !transactions.value?.length && (
-            <div class="text-center text-sm py-8">
-              No transactions for
-              {' '}
-              {getRangeDisplayValue(range.value, true)}
-            </div>
-          )
-        }
+        {!transactions.value?.length && (
+          <div class='text-center text-sm py-8'>
+            No transactions for {getRangeDisplayValue(range.value, true)}
+          </div>
+        )}
       </div>
 
-      <div class="flex justify-end py-2 px-4">
-        <div className="join">
-          <button className="join-item btn btn-outline btn-xs" onClick={handlePagination('prev')}><CarbonTriangleLeftSolid /></button>
+      <div class='flex justify-end py-2 px-4'>
+        <div className='join'>
           <button
-            className="join-item btn btn-primary btn-outline btn-xs"
+            className='join-item btn btn-outline btn-xs'
+            onClick={handlePagination('prev')}
+          >
+            <CarbonTriangleLeftSolid />
+          </button>
+          <button
+            className='join-item btn btn-primary btn-outline btn-xs'
             onClick={handlePagination('reset')}
           >
-            Page
-            {' '}
-            {page.value + 1}
+            Page {page.value + 1}
           </button>
-          <button className="join-item btn btn-outline btn-xs" onClick={handlePagination('next')}><CarbonTriangleRightSolid /></button>
+          <button
+            className='join-item btn btn-outline btn-xs'
+            onClick={handlePagination('next')}
+          >
+            <CarbonTriangleRightSolid />
+          </button>
         </div>
       </div>
     </div>

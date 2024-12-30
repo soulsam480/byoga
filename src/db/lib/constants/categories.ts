@@ -1,6 +1,8 @@
 import type { TransactionModel } from '../../schema'
 
-export const TRANSACTION_CATEGORIES: Array<TransactionModel['transaction_category']> = [
+export const TRANSACTION_CATEGORIES: Array<
+  TransactionModel['transaction_category']
+> = [
   'food',
   'bike',
   'domestic',
@@ -19,5 +21,5 @@ export const TRANSACTION_CATEGORIES: Array<TransactionModel['transaction_categor
   'atm_cash',
   'salary',
   'bank_transfer',
-  'unknown',
+  'unknown'
 ]

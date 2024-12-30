@@ -12,5 +12,5 @@ export const Migration1728796142436AddEvent: Migration = {
   },
   async down(db: Kysely<any>) {
     await db.schema.dropTable('events').execute()
-  },
+  }
 }

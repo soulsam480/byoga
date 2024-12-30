@@ -7,6 +7,6 @@ import { Migration1728833999032AddEventToTransaction } from './1728833999032_add
 export const migrations: Record<string, Migration> = {
   1720360595599: Migration1720360595599AddTransaction,
   1728796142436: Migration1728796142436AddEvent,
-  1728833999032: Migration1728833999032AddEventToTransaction,
+  1728833999032: Migration1728833999032AddEventToTransaction
   // REGISTER
 }

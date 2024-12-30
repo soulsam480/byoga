@@ -17,10 +17,9 @@ render(
   //   return 'ERROR'
   // }}
   // >
-  <App />
+  <App />,
   // </ErrorBoundary>
-  ,
-  document.getElementById('app')!,
+  document.getElementById('app')!
 )
 
 registerSW({ immediate: true })

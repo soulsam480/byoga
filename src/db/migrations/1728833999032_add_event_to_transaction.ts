@@ -8,9 +8,6 @@ export const Migration1728833999032AddEventToTransaction: Migration = {
       .execute()
   },
   async down(db: Kysely<any>) {
-    await db.schema
-      .alterTable('transactions')
-      .dropColumn('event_id')
-      .execute()
-  },
+    await db.schema.alterTable('transactions').dropColumn('event_id').execute()
+  }
 }
