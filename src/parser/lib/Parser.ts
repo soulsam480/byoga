@@ -1,6 +1,6 @@
-import type { TransactionInsert } from '../../db/schema'
-import type { FileReader } from './FileReader'
-import type { Transformer } from './Transformer'
+import type { TransactionInsert } from '@/db/schema'
+import type { FileReader } from '@/parser/lib/FileReader'
+import type { Transformer } from '@/parser/lib/Transformer'
 
 export abstract class Processor {
   abstract get reader(): FileReader

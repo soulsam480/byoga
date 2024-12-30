@@ -11,72 +11,59 @@ import { invalidateQuery } from '../query/useQuery'
 import { logger } from '../utils/logger'
 import { showAlert } from './Alerts'
 import { HelpModal } from './HelpModal'
+import { FileImportModal } from '@/lib/components/FileImportModal'
+import type { TSupportedBanks } from '@/parser/banks/supported'
 
-async function importFile() {
-  const worker = new ComlinkWorker<
-          typeof import('../../workers/xlsx.worker')
-  >(new URL('../../workers/xlsx.worker', import.meta.url), { type: 'module' })
+async function importFile(event: SubmitEvent) {
+  const worker = new ComlinkWorker<typeof import('../../workers/xlsx.worker')>(
+    new URL('../../workers/xlsx.worker', import.meta.url),
+    { type: 'module' }
+  )
 
-  const inputEl = document.createElement('input')
+  const formData = new FormData(event.target as HTMLFormElement)
 
-  inputEl.type = 'file'
-  inputEl.accept = '.xlsx'
+  const file = formData.get('files')
 
-  inputEl.style.opacity = '0'
+  if (file === null) return
 
-  inputEl.addEventListener('cancel', async () => {
-    document.body.removeChild(inputEl)
-  })
+  const transactions = await worker.getTransactionRows(
+    file as File,
+    (formData.get('bank') as TSupportedBanks) ?? 'idfc'
+  )
 
-  inputEl.addEventListener('change', async (event) => {
-    const target = event.target as HTMLInputElement
+  if (transactions !== undefined) {
+    showAlert({
+      type: 'info',
+      message: `Started importing ${transactions.length} transactions!`
+    })
 
-    const file = target.files?.[0]
+    logger.info(
+      `[IMPORT]: started importing ${transactions.length} transactions.`
+    )
 
-    if (file === undefined)
-      return
+    await db.transaction().execute(async trx => {
+      for (const transaction of transactions) {
+        await trx
+          .insertInto('transactions')
+          .values(transaction)
+          .onConflict(qb => qb.column('transaction_ref').doNothing())
+          .returning('id')
+          .execute()
+      }
+    })
 
-    document.body.removeChild(inputEl)
+    logger.info(`[IMPORT]: Done importing ${transactions.length} transactions.`)
 
-    const transactions = await worker.process(file)
+    showAlert({
+      type: 'success',
+      message: `Imported ${transactions.length} transactions!`
+    })
 
-    if (transactions !== undefined) {
-      showAlert({
-        type: 'info',
-        message: `Started importing ${transactions.length} transactions!`,
-      })
+    void invalidateQuery('*')
+  }
 
-      logger.info(`[IMPORT]: started importing ${transactions.length} transactions.`)
-
-      await db.transaction().execute(async (trx) => {
-        for (const transaction of transactions) {
-          await trx
-            .insertInto('transactions')
-            .values(transaction)
-            .onConflict(qb =>
-              qb.column('transaction_ref').doNothing(),
-            )
-            .returning('id')
-            .execute()
-        }
-      })
-
-      logger.info(`[IMPORT]: Done importing ${transactions.length} transactions.`)
-
-      showAlert({
-        type: 'success',
-        message: `Imported ${transactions.length} transactions!`,
-      })
-
-      void invalidateQuery('*')
-    }
-
-    worker[endpointSymbol].terminate()
-  })
-
-  document.body.appendChild(inputEl)
-
-  inputEl.click()
+  worker[endpointSymbol].terminate()
+  document.querySelector<HTMLDialogElement>('#file_import_modal')?.close()
 }
 
 async function handleDBReset() {
@@ -91,53 +78,91 @@ export function Navbar() {
   const router = useRouter()
 
   return (
-    <div class="flex flex-col items-center py-4 bg-base-100 shadow w-14 max-w-14 gap-4">
-      <img src="/pwa-192x192.png" height={32} width={32} />
+    <div class='flex flex-col items-center py-4 bg-base-100 shadow w-14 max-w-14 gap-4'>
+      <img src='/pwa-192x192.png' height={32} width={32} alt='logo' />
 
-      <h4 class="text-xs font-semibold">Byoga</h4>
+      <h4 class='text-xs font-semibold'>Byoga</h4>
 
-      <div class="border-b border-base-300 w-full"></div>
+      <div class='border-b border-base-300 w-full' />
 
-      <div className="tooltip tooltip-accent tooltip-right" data-tip="Home">
-        <a href="#home" type="button" class={clsx('btn btn-sm btn-circle', router.page.value === 'home' ? 'btn-accent btn-active' : 'btn-outline')}>
+      <div className='tooltip tooltip-accent tooltip-right' data-tip='Home'>
+        <a
+          href='#home'
+          type='button'
+          class={clsx(
+            'btn btn-sm btn-circle',
+            router.page.value === 'home'
+              ? 'btn-accent btn-active'
+              : 'btn-outline'
+          )}
+        >
           <CarbonChartArea />
         </a>
       </div>
 
-      <div className="tooltip tooltip-accent tooltip-right" data-tip="Settings">
-        <a href="#settings" type="button" class={clsx('btn btn-sm btn-circle', router.page.value === 'settings' ? 'btn-accent btn-active' : 'btn-outline')}>
+      <div className='tooltip tooltip-accent tooltip-right' data-tip='Settings'>
+        <a
+          href='#settings'
+          type='button'
+          class={clsx(
+            'btn btn-sm btn-circle',
+            router.page.value === 'settings'
+              ? 'btn-accent btn-active'
+              : 'btn-outline'
+          )}
+        >
           <CarbonSettings />
         </a>
       </div>
 
-      <div class="flex flex-col gap-4 items-center mt-auto">
-        <div className="tooltip tooltip-primary tooltip-right" data-tip="Help">
+      <div class='flex flex-col gap-4 items-center mt-auto'>
+        <div className='tooltip tooltip-primary tooltip-right' data-tip='Help'>
           <button
-            type="button"
-            class="btn btn-primary btn-sm btn-circle"
+            type='button'
+            class='btn btn-primary btn-sm btn-circle'
             onClick={() => {
-              document.querySelector<HTMLDialogElement>('#help_modal')?.showModal()
+              document
+                .querySelector<HTMLDialogElement>('#help_modal')
+                ?.showModal()
             }}
           >
             <CarbonHelpFilled />
           </button>
-
         </div>
 
-        <div className="tooltip tooltip-primary tooltip-right" data-tip="Import Statement">
-          <button type="button" class="btn btn-primary btn-sm btn-circle" onClick={importFile}>
+        <div
+          className='tooltip tooltip-primary tooltip-right'
+          data-tip='Import Statement'
+        >
+          <button
+            type='button'
+            class='btn btn-primary btn-sm btn-circle'
+            onClick={() => {
+              document
+                .querySelector<HTMLDialogElement>('#file_import_modal')
+                ?.showModal()
+            }}
+          >
             <CarbonDocumentImport />
           </button>
         </div>
 
-        <div className="tooltip tooltip-error tooltip-right" data-tip="Reset Database">
-          <button type="button" class="btn btn-error btn-outline btn-sm btn-circle" onClick={handleDBReset}>
+        <div
+          className='tooltip tooltip-error tooltip-right'
+          data-tip='Reset Database'
+        >
+          <button
+            type='button'
+            class='btn btn-error btn-outline btn-sm btn-circle'
+            onClick={handleDBReset}
+          >
             <CarbonReset />
           </button>
         </div>
       </div>
 
       <HelpModal />
+      <FileImportModal onSubmit={importFile} />
     </div>
   )
 }

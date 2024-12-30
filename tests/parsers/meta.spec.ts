@@ -2,7 +2,7 @@ import * as R from 'remeda'
 import { describe, expect, it } from 'vitest'
 import {
   type IntermediateMetaResult,
-  parseAdditionalMeta,
+  parseAdditionalMeta
 } from '../../src/workers/lib/parsers/meta'
 // import { upi } from './parserCases.json'
 // TODO: add more tests
@@ -17,15 +17,15 @@ function createUPIData(meta: string): IntermediateMetaResult {
     transaction: {
       'Transaction Date': '2024-01-01T18:30:00.000Z',
       'Value Date': '2024-01-01T18:30:00.000Z',
-      'Particulars': meta,
+      Particulars: meta,
       'Cheque No.': '',
-      'Debit': '15,000.00',
-      'Credit': '',
-      'Balance': '214,800.00',
+      Debit: '15,000.00',
+      Credit: '',
+      Balance: '214,800.00'
     },
     transaction_mode: 'upi',
     transaction_ref: '400230892772',
-    additional: {},
+    additional: {}
   }
 }
 
@@ -37,15 +37,15 @@ function createATMData(): IntermediateMetaResult {
     transaction: {
       'Transaction Date': '2024-01-01T18:30:00.000Z',
       'Value Date': '2024-01-01T18:30:00.000Z',
-      'Particulars': 'ATM-NFS/CASH WITHDRAWAL/R K FILLI/418212018475/SEL',
+      Particulars: 'ATM-NFS/CASH WITHDRAWAL/R K FILLI/418212018475/SEL',
       'Cheque No.': '',
-      'Debit': '15,000.00',
-      'Credit': '',
-      'Balance': '214,800.00',
+      Debit: '15,000.00',
+      Credit: '',
+      Balance: '214,800.00'
     },
     transaction_mode: 'atm',
     transaction_ref: '418212018475',
-    additional: {},
+    additional: {}
   }
 }
 
@@ -71,17 +71,17 @@ describe('parsers/parseAdditionalMeta', () => {
         'food chocolate',
         'out lunch',
         'hotel dinner',
-        'food dinner',
+        'food dinner'
       ]
 
       it('extracts categories', () => {
         R.pipe(
           cases,
           R.map(it => R.pipe(it, createUPIData, parseAdditionalMeta)),
-          R.forEach((ctx) => {
+          R.forEach(ctx => {
             expect(Array.from(ctx.categories)).toEqual(['food'])
             expect(Array.from(ctx.tags).length).greaterThanOrEqual(1)
-          }),
+          })
         )
       })
     })
@@ -94,17 +94,17 @@ describe('parsers/parseAdditionalMeta', () => {
         'deposit',
         'mother deposit',
         'mother sbi deposit',
-        'monthly deposit',
+        'monthly deposit'
       ]
 
       it('extracts categories', () => {
         R.pipe(
           cases,
           R.map(it => R.pipe(it, createUPIData, parseAdditionalMeta)),
-          R.forEach((ctx) => {
+          R.forEach(ctx => {
             expect(Array.from(ctx.categories)).toEqual(['deposit'])
             expect(Array.from(ctx.tags).length).greaterThanOrEqual(1)
-          }),
+          })
         )
       })
     })
@@ -114,11 +114,19 @@ describe('parsers/parseAdditionalMeta', () => {
         R.pipe(
           createUPIData('I test p Soumya l phoniex mall r lord of drinks'),
           parseAdditionalMeta,
-          (ctx) => {
+          ctx => {
             expect(Array.from(ctx.categories)).toEqual(['test'])
-            expect(Array.from(ctx.tags)).toEqual(['party', 'location', 'description'])
-            expect(ctx.additional).toEqual({ party: 'Soumya', location: 'phoniex mall', description: 'lord of drinks' })
-          },
+            expect(Array.from(ctx.tags)).toEqual([
+              'party',
+              'location',
+              'description'
+            ])
+            expect(ctx.additional).toEqual({
+              party: 'Soumya',
+              location: 'phoniex mall',
+              description: 'lord of drinks'
+            })
+          }
         )
       })
     })

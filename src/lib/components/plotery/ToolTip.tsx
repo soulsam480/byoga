@@ -37,7 +37,7 @@ export function ByogaToolTip({
   rect,
   series = 'debit',
   renderText = ([_, point]) => point[1].toFixed(2),
-  host,
+  host
 }: ITooltipProps) {
   if (!data || data.length === 0 || !axes || !position || !rect || !host) {
     return null
@@ -54,44 +54,45 @@ export function ByogaToolTip({
 
   return (
     <>
-      <path d={`M${position[0]},0V${rect.height}`} stroke-width="1px" stroke="grey" stroke-dasharray="4" />
-      {
-        seriesValues.map(([series, point], index) => {
-          return (
-            <Fragment key={index}>
-              <circle
-                cx={axes.x.scale(point[0])}
-                cy={axes.y.scale(point[1])}
-                r="5"
-                stroke-width="2px"
-                stroke="white"
-                fill={`var(--${series})`}
-              />
-            </Fragment>
-          )
-        })
-      }
+      <path
+        d={`M${position[0]},0V${rect.height}`}
+        stroke-width='1px'
+        stroke='grey'
+        stroke-dasharray='4'
+      />
+      {seriesValues.map(([series, point], index) => {
+        return (
+          <Fragment key={index}>
+            <circle
+              cx={axes.x.scale(point[0])}
+              cy={axes.y.scale(point[1])}
+              r='5'
+              stroke-width='2px'
+              stroke='white'
+              fill={`var(--${series})`}
+            />
+          </Fragment>
+        )
+      })}
 
       <foreignObject
         x={position[0]}
         y={position[1]}
-        width="100%"
-        height="100%"
-        class="overflow-visible"
+        width='100%'
+        height='100%'
+        class='overflow-visible'
       >
-        <ul class="flex flex-col gap-1 items-start bg-white rounded shadow p-2 max-w-max">
-          {
-            textToRender.map((el, index) => {
-              const seriesName = seriesValues[index][0]
+        <ul class='flex flex-col gap-1 items-start bg-white rounded shadow p-2 max-w-max'>
+          {textToRender.map((el, index) => {
+            const seriesName = seriesValues[index][0]
 
-              return (
-                <li class="text-[10px] inline-flex gap-1">
-                  <CarbonDotMark style={{ color: `var(--${seriesName})` }} />
-                  {el}
-                </li>
-              )
-            })
-          }
+            return (
+              <li class='text-[10px] inline-flex gap-1'>
+                <CarbonDotMark style={{ color: `var(--${seriesName})` }} />
+                {el}
+              </li>
+            )
+          })}
         </ul>
       </foreignObject>
     </>

@@ -10,7 +10,7 @@ export class ByogaHorizontalBar extends Component<ByogaHorizontalBarProps> {
   _scale(points: ChartSeriesData) {
     return points.map(x => [
       this.props.axes?.x.scale(x[0]),
-      this.props.axes?.y.scale(x[1]),
+      this.props.axes?.y.scale(x[1])
     ]) as ChartSeriesData
   }
 
@@ -26,8 +26,18 @@ export class ByogaHorizontalBar extends Component<ByogaHorizontalBarProps> {
     return points.reduce((acc, x) => `${acc}M${x[0]},${x[1]}V${zero}`, '')
   }
 
-  render({ className, data, rect, axes, series, base: _, host: __, ...attrs }: ByogaHorizontalBarProps) {
-    const points = data && (Array.isArray(data) ? data : series ? data[series] : undefined)
+  render({
+    className,
+    data,
+    rect,
+    axes,
+    series,
+    base: _,
+    host: __,
+    ...attrs
+  }: ByogaHorizontalBarProps) {
+    const points =
+      data && (Array.isArray(data) ? data : series ? data[series] : undefined)
 
     if (!points || !points.length || !axes?.x || !axes?.y) {
       return null
@@ -38,12 +48,16 @@ export class ByogaHorizontalBar extends Component<ByogaHorizontalBarProps> {
 
     return (
       <svg
-        className={clsx('plot cartesian bar', series, this.props.class || className)}
+        className={clsx(
+          'plot cartesian bar',
+          series,
+          this.props.class || className
+        )}
         width={rect?.width}
         height={rect?.height}
         {...attrs}
       >
-        <path className="bars" d={path} />
+        <path className='bars' d={path} />
       </svg>
     )
   }

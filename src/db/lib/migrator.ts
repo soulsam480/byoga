@@ -9,8 +9,8 @@ export const migrator = new Migrator({
       const { migrations } = await import('../migrations')
 
       return migrations
-    },
-  },
+    }
+  }
 })
 
 let dbPromise: Promise<MigrationResultSet> | null = null

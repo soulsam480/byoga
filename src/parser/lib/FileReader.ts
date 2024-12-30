@@ -1,12 +1,10 @@
-import Papa from 'papaparse'
 import type { Sheet2CSVOpts } from 'xlsx'
+import Papa from 'papaparse'
 import { read, utils } from 'xlsx'
 
 export interface IRawTransactionRow {
   transaction_date: string
   meta: string
-  // TODO: check if we need it
-  // 'Cheque No.': string
   debit: string
   credit: string
   balance: string
@@ -14,7 +12,7 @@ export interface IRawTransactionRow {
 
 const XLSX_TYPES = new Set([
   'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 ])
 
 export abstract class FileReader {
@@ -34,7 +32,10 @@ export abstract class FileReader {
    * - We ned a known output format for transformer to process
    * - so here we'll serialize unknown headers to known ones
    */
-  abstract transformHeader(header: string, index: number): keyof IRawTransactionRow
+  abstract transformHeader(
+    header: string,
+    index: number
+  ): keyof IRawTransactionRow
 
   /**
    * - returns transaction rows that can be passed to transformer
@@ -45,8 +46,7 @@ export abstract class FileReader {
 
     if (XLSX_TYPES.has(file.type)) {
       csv = await this.xlsxToCSV(file)
-    }
-    else {
+    } else {
       csv = await file.text()
     }
 
@@ -69,7 +69,7 @@ export abstract class FileReader {
     return utils.sheet_to_csv(workSheet, {
       ...opts,
       blankrows: false,
-      skipHidden: true,
+      skipHidden: true
     })
   }
 
@@ -77,15 +77,15 @@ export abstract class FileReader {
    * convert csv to array of transaction rows
    * Return type is array of unknown records as csv headers vary for different banks
    */
-  protected parseCSV(csv: string, config: Papa.ParseConfig = {}): Array<IRawTransactionRow> {
-    const res = Papa.parse(
-      this.makeParsableCSV(csv),
-      {
-        ...config,
-        header: true,
-        transformHeader: this.transformHeader.bind(this),
-      },
-    )
+  protected parseCSV(
+    csv: string,
+    config: Papa.ParseConfig = {}
+  ): Array<IRawTransactionRow> {
+    const res = Papa.parse(this.makeParsableCSV(csv), {
+      ...config,
+      header: true,
+      transformHeader: this.transformHeader.bind(this)
+    })
 
     if (res.errors.length === 0) {
       return res.data

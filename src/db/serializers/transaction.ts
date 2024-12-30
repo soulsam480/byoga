@@ -3,9 +3,9 @@ import type { TransactionModel } from '../schema'
 const DATE_KEYS = new Set(['transaction_at', 'created_at', 'updated_at'])
 
 export function serializeTransaction(
-  value: Record<string, any>,
+  value: Record<string, any>
 ): TransactionModel {
-  DATE_KEYS.forEach((key) => {
+  DATE_KEYS.forEach(key => {
     if (key in value) {
       value[key] = new Date(value[key])
     }

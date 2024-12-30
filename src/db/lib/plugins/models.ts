@@ -11,7 +11,7 @@ import type {
   QueryResult,
   RootOperationNode,
   UnknownRow,
-  ValueNode,
+  ValueNode
 } from 'kysely'
 import { OperationNodeTransformer } from 'kysely'
 // import { SERIALIZER_REGISTRY } from '../../serializers'
@@ -34,11 +34,17 @@ export function searializeQueryValue(value: unknown): unknown {
 }
 
 function serializeRowDate(row: Record<string, any>) {
-  const DATE_KEYS = new Set(['transaction_at', 'created_at', 'updated_at', 'start_at', 'end_at'])
+  const DATE_KEYS = new Set([
+    'transaction_at',
+    'created_at',
+    'updated_at',
+    'start_at',
+    'end_at'
+  ])
 
   // console.log('LOG C', row)
 
-  DATE_KEYS.forEach((key) => {
+  DATE_KEYS.forEach(key => {
     if (key in row) {
       row[key] = new Date(row[key])
     }
@@ -53,11 +59,11 @@ export class SerializeParametersTransformer extends OperationNodeTransformer {
   }
 
   protected override transformPrimitiveValueList(
-    node: PrimitiveValueListNode,
+    node: PrimitiveValueListNode
   ): PrimitiveValueListNode {
     return {
       ...node,
-      values: node.values.map(searializeQueryValue),
+      values: node.values.map(searializeQueryValue)
     }
   }
 
@@ -77,14 +83,14 @@ export class SerializeParametersTransformer extends OperationNodeTransformer {
       ? super.transformColumnUpdate(node)
       : super.transformColumnUpdate({
           ...node,
-          value: { ...item, value: serializedValue } as ValueNode,
+          value: { ...item, value: serializedValue } as ValueNode
         })
   }
 
   protected override transformValue(node: ValueNode): ValueNode {
     return {
       ...node,
-      value: searializeQueryValue(node.value),
+      value: searializeQueryValue(node.value)
     }
   }
 }
@@ -124,7 +130,7 @@ export class TypeBoxModelsPlugin implements KyselyPlugin {
     // }
 
     try {
-      return rows.map((row) => {
+      return rows.map(row => {
         if (row === undefined || row === null) {
           return row
         }
@@ -132,16 +138,18 @@ export class TypeBoxModelsPlugin implements KyselyPlugin {
         // return tableSerializer(row)
         return serializeRowDate(row)
       })
-    }
-    catch (error) {
-      logger.error(`[Model Plugin]: Error while parsing table ${table}`, JSON.stringify(error))
+    } catch (error) {
+      logger.error(
+        `[Model Plugin]: Error while parsing table ${table}`,
+        JSON.stringify(error)
+      )
 
       throw new Error(`[Model Plugin]: ${table} => ${(error as Error).message}`)
     }
   }
 
   public async transformResult(
-    args: PluginTransformResultArgs,
+    args: PluginTransformResultArgs
   ): Promise<QueryResult<UnknownRow>> {
     const { result, queryId } = args
 
@@ -150,7 +158,7 @@ export class TypeBoxModelsPlugin implements KyselyPlugin {
     return result.rows && ctx
       ? {
           ...args.result,
-          rows: this.parseResult(result.rows, ctx),
+          rows: this.parseResult(result.rows, ctx)
         }
       : args.result
   }

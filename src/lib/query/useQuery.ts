@@ -10,7 +10,9 @@ const store = signal<Record<string, any>>({})
 export function useQueryData<T>(key: string[], defaultValue?: T) {
   const serialized = useComputed(() => JSON.stringify(key))
 
-  const value = useComputed<T | undefined>(() => store.value[serialized.value] ?? defaultValue)
+  const value = useComputed<T | undefined>(
+    () => store.value[serialized.value] ?? defaultValue
+  )
 
   return value
 }
@@ -22,7 +24,7 @@ interface IQueryConfig<T> {
 export function useQuery<T>(
   key: any[] | (() => any[]),
   fetcher: () => Promise<T>,
-  { defautlValue }: IQueryConfig<T> = {},
+  { defautlValue }: IQueryConfig<T> = {}
 ) {
   const serialized = useComputed(() => {
     if (typeof key === 'function') {
@@ -37,7 +39,7 @@ export function useQuery<T>(
 
     store.value = {
       ...store.peek(),
-      [serialized.value]: result,
+      [serialized.value]: result
     }
   }
 
@@ -47,18 +49,20 @@ export function useQuery<T>(
     void invalidate()
   })
 
-  const value = useComputed<T | undefined>(() => store.value[serialized.value] ?? defautlValue)
+  const value = useComputed<T | undefined>(
+    () => store.value[serialized.value] ?? defautlValue
+  )
 
   return {
     value,
-    invalidate,
+    invalidate
   }
 }
 
 export async function invalidateQuery(queryKey: '*' | string[]) {
   if (typeof queryKey === 'string') {
     for (const fetcher in fetcherStore) {
-      await (fetcherStore)[fetcher]()
+      await fetcherStore[fetcher]()
     }
 
     return

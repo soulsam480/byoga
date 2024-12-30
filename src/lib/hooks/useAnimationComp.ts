@@ -11,25 +11,29 @@ export function useAnimationComp(root: string, dep: Signal<unknown>) {
     const _d = dep.value
 
     tick().then(() => {
-      document.querySelectorAll<SVGPathElement>(`${root} .plot.cartesian .bars`).forEach((el) => {
-        el.style.setProperty('--path-length', el.getTotalLength().toString())
+      document
+        .querySelectorAll<SVGPathElement>(`${root} .plot.cartesian .bars`)
+        .forEach(el => {
+          el.style.setProperty('--path-length', el.getTotalLength().toString())
 
-        el.classList.remove('bar-animation')
+          el.classList.remove('bar-animation')
 
-        tick().then(() => {
-          el.classList.add('bar-animation')
+          tick().then(() => {
+            el.classList.add('bar-animation')
+          })
         })
-      })
 
-      document.querySelectorAll<SVGPathElement>(`${root} .plot.cartesian .line`).forEach((el) => {
-        el.style.setProperty('--path-length', el.getTotalLength().toString())
+      document
+        .querySelectorAll<SVGPathElement>(`${root} .plot.cartesian .line`)
+        .forEach(el => {
+          el.style.setProperty('--path-length', el.getTotalLength().toString())
 
-        el.classList.remove('line-animation')
+          el.classList.remove('line-animation')
 
-        tick().then(() => {
-          el.classList.add('line-animation')
+          tick().then(() => {
+            el.classList.add('line-animation')
+          })
         })
-      })
     })
   })
 }
