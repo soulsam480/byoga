@@ -1,3 +1,6 @@
+import { FileImportModal } from '@/lib/components/FileImportModal'
+import type { TSupportedBanks } from '@/parser/banks/supported'
+import { Feeder } from '@/parser/lib/Feeder'
 import clsx from 'clsx'
 import { endpointSymbol } from 'vite-plugin-comlink/symbol'
 import CarbonChartArea from '~icons/carbon/chart-area'
@@ -5,14 +8,11 @@ import CarbonDocumentImport from '~icons/carbon/document-import'
 import CarbonHelpFilled from '~icons/carbon/help-filled'
 import CarbonReset from '~icons/carbon/reset'
 import CarbonSettings from '~icons/carbon/settings'
-import { db, deleteDB } from '../../db/client'
+import { deleteDB } from '../../db/client'
 import { useRouter } from '../hooks/useRouter'
 import { invalidateQuery } from '../query/useQuery'
-import { logger } from '../utils/logger'
 import { showAlert } from './Alerts'
 import { HelpModal } from './HelpModal'
-import { FileImportModal } from '@/lib/components/FileImportModal'
-import type { TSupportedBanks } from '@/parser/banks/supported'
 
 async function importFile(event: SubmitEvent) {
   const worker = new ComlinkWorker<typeof import('../../workers/xlsx.worker')>(
@@ -31,36 +31,9 @@ async function importFile(event: SubmitEvent) {
     (formData.get('bank') as TSupportedBanks) ?? 'idfc'
   )
 
-  if (transactions !== undefined) {
-    showAlert({
-      type: 'info',
-      message: `Started importing ${transactions.length} transactions!`
-    })
+  const feeder = new Feeder()
 
-    logger.info(
-      `[IMPORT]: started importing ${transactions.length} transactions.`
-    )
-
-    await db.transaction().execute(async trx => {
-      for (const transaction of transactions) {
-        await trx
-          .insertInto('transactions')
-          .values(transaction)
-          .onConflict(qb => qb.column('transaction_ref').doNothing())
-          .returning('id')
-          .execute()
-      }
-    })
-
-    logger.info(`[IMPORT]: Done importing ${transactions.length} transactions.`)
-
-    showAlert({
-      type: 'success',
-      message: `Imported ${transactions.length} transactions!`
-    })
-
-    void invalidateQuery('*')
-  }
+  await feeder.feed(transactions)
 
   worker[endpointSymbol].terminate()
   document.querySelector<HTMLDialogElement>('#file_import_modal')?.close()
