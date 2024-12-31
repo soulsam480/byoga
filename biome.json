@@ -28,6 +28,9 @@
       "recommended": true,
       "suspicious": {
         "noExplicitAny": "off"
+      },
+      "a11y": {
+        "all": false
       }
     }
   },

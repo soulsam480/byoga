@@ -61,8 +61,12 @@ export function ByogaToolTip({
         stroke-dasharray='4'
       />
       {seriesValues.map(([series, point], index) => {
+        if (point === undefined) {
+          return null
+        }
+
         return (
-          <Fragment key={index}>
+          <Fragment key={index.toString()}>
             <circle
               cx={axes.x.scale(point[0])}
               cy={axes.y.scale(point[1])}
@@ -87,7 +91,7 @@ export function ByogaToolTip({
             const seriesName = seriesValues[index][0]
 
             return (
-              <li class='text-[10px] inline-flex gap-1'>
+              <li key={index.toString()} class='text-[10px] inline-flex gap-1'>
                 <CarbonDotMark style={{ color: `var(--${seriesName})` }} />
                 {el}
               </li>

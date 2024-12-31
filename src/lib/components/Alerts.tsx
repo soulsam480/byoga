@@ -14,15 +14,17 @@ const alerts = signal<IAlert[]>([])
 export function showAlert(alert: IAlert) {
   alerts.value.push(alert)
 
-  tick().then(() => {
-    const result = alerts.value.slice()
+  window.setTimeout(() => {
+    tick().then(() => {
+      const result = alerts.value.slice()
 
-    result.shift()
+      result.shift()
 
-    alerts.value = result
+      alerts.value = result
 
-    return result
-  })
+      return result
+    })
+  }, 1000)
 }
 
 const ALERT_TO_CLASS_MAP: Record<IAlert['type'], string> = {
@@ -34,10 +36,14 @@ const ALERT_TO_CLASS_MAP: Record<IAlert['type'], string> = {
 
 export function Alerts(): JSX.Element {
   return createPortal(
-    <div class='fixed top-8 z-50 inset-x-0 flex flex-col gap-2 items-center justify-center'>
+    <div
+      data-alerts
+      class='fixed top-8 z-50 inset-x-0 flex flex-col gap-2 items-center justify-center'
+    >
       {alerts.value.map(value => {
         return (
           <div
+            key={value.message}
             role='alert'
             className={clsx(['alert max-w-96', ALERT_TO_CLASS_MAP[value.type]])}
           >

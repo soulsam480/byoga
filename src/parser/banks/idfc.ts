@@ -350,7 +350,7 @@ class IDFCTransformer extends Transformer {
             transaction_category: Array.from(categories)[0] ?? 'unknown',
             updated_at: new Date(),
             created_at: new Date(),
-            transaction_at: new Date(transaction.transaction_date),
+            transaction_at: new Date(Date.parse(transaction.transaction_date)),
             meta: transaction.meta,
             // cheque_no: Transformer.optionalInteger(Transformer.defaultNull(transaction['Cheque No.'])),
             cheque_no: null,

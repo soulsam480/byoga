@@ -98,6 +98,8 @@ export function SpendingCatoriesViz() {
         <Tooltip>
           <ByogaToolTip
             renderText={data => {
+              if (data[0] === undefined || data[1] === undefined) return ''
+
               return `${titleCase(dataSet.value.labels[data[1][1]])}: ${formatCurrency(data[1][0])}`
             }}
           />

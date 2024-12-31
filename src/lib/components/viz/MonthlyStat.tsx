@@ -208,6 +208,8 @@ export function AllTimeMonthlyViz() {
         <Tooltip>
           <ByogaToolTip
             renderText={data => {
+              if (data[0] === undefined || data[1] === undefined) return ''
+
               return `${titleCase(data[0])}: ${formatCurrency(data[1][1])}`
             }}
           />

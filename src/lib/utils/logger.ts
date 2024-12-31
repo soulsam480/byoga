@@ -3,7 +3,7 @@ import colors from 'tiny-colors'
 
 export const logger = {
   info(...args: any[]) {
-    console.info(colors.bgBlack.bold.blue('[BYOGA INFO]:'), ...args)
+    console.info(colors.bgBlack.bold.white('[BYOGA INFO]:'), ...args)
   },
   warn(...args: any[]) {
     console.warn(colors.bgBlack.bold.yellow('[BYOGA WARN]:'), ...args)

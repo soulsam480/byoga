@@ -130,7 +130,7 @@ function AggregateRow({ total_credit, total_debit }: IAggregateRowProps) {
 
       {total_debit !== undefined && <td>= {formatCurrency(total_debit)}</td>}
 
-      <td colSpan={4}></td>
+      <td colSpan={4} />
     </tr>
   )
 }
@@ -303,8 +303,12 @@ function SelectionActionsRow({
         </button>
         <ul
           tabIndex={0}
-          className='dropdown-content menu menu-xs bg-base-100 rounded-box z-10 w-52 p-2 shadow h-52 overflow-y-scroll'
+          className='dropdown-content menu mt-2  menu-xs bg-base-100 rounded-box z-10 w-52 p-2 shadow max-h-52 overflow-y-scroll'
         >
+          {events.value?.length === 0 && (
+            <div class='text-xs'>No events found!</div>
+          )}
+
           {events.value?.map(event => {
             return (
               <li
@@ -321,25 +325,26 @@ function SelectionActionsRow({
       </div>
 
       <div className='dropdown dropdown-bottom'>
-        <button className='btn btn-xs'>Create new</button>
+        <button className='btn btn-xs'>Create new Event</button>
         <div
           tabIndex={0}
-          className='dropdown-content bg-base-100 rounded-box z-10 w-52 p-2 shadow'
+          className='dropdown-content mt-2 bg-base-100 rounded-box z-10 w-52 p-2 shadow'
         >
           <form
             onSubmit={handleEventCreationAndLink}
             class='flex flex-col gap-2'
           >
             <input
+              required
               type='text'
               name='name'
               placeholder='Event name'
-              className='input input-bordered input-sm w-full max-w-xs'
+              className='input input-bordered input-xs w-full max-w-xs'
             />
 
             <div className='flex justify-end'>
               <button type='submit' className='btn btn-xs'>
-                Add Event
+                Add to Event
               </button>
             </div>
           </form>
@@ -419,12 +424,15 @@ export function TransactionsTable() {
             ])
           ).as('aggr')
         ])
-        .where(
-          eb => sql`exists (
-              select 1 
-              from json_each(${eb.ref('transactions.tags')}) 
-              where json_each.value like ${`%${_search}%`}
-            )`
+        .where(eb =>
+          eb.or([
+            sql<boolean>`exists (
+                   select 1
+                   from json_each(${eb.ref('transactions.tags')})
+                   where json_each.value like ${`%${_search}%`}
+                 )`,
+            eb('e.name', 'like', `%${_search}%`)
+          ])
         )
         .orderBy(sql`unixepoch(transactions.transaction_at)`, _order)
         .limit(15)
@@ -481,7 +489,7 @@ export function TransactionsTable() {
             onChange={e => {
               if (e.currentTarget.value !== '') return
 
-              search.value = e.currentTarget.value ?? ''
+              search.value = ''
             }}
             value={search}
           />

@@ -100,6 +100,8 @@ export function SpendModesViz() {
         <Tooltip>
           <ByogaToolTip
             renderText={data => {
+              if (data[0] === undefined || data[1] === undefined) return ''
+
               return `${dataSet.value.labels[data[1][1]].toUpperCase()}: ${formatCurrency(data[1][0])}`
             }}
           />
